@@ -4,8 +4,7 @@
 #include"Vector.hpp"
 #include"Iterator_traits.hpp"
 
-//template <class T, class Alloc>
-//class My_class;
+
 
 template<class T>
 class Randomiterator : public std::iterator<std::random_access_iterator_tag, T>
@@ -27,21 +26,30 @@ public:
 	Randomiterator& operator++();
 	Randomiterator& operator++(int);
 	Randomiterator& operator--();
-	Randomiterator& operator--(int);
+	Randomiterator operator--(int);
 	Randomiterator operator+(size_t const& x);
 	Randomiterator operator+=(int const& x);
 	Randomiterator operator-(int const& x);
 	difference_type operator-(Randomiterator const& x) { return ptr - x.ptr; };
 	Randomiterator operator-=(int const& x);
-	bool operator==(Randomiterator const& x);
-	bool operator!=(Randomiterator const& x);
-	bool operator>(Randomiterator const& x);
-	bool operator>=(Randomiterator const& x);
-	bool operator<(Randomiterator const& x);
-	bool operator<=(Randomiterator const& x);
 	reference operator*();
 	pointer operator->();
+	reference operator[](difference_type n);
 	Randomiterator& operator=(Randomiterator const& x);
+
+/* ************  Non-member functions  *****************/
+	template<class V>
+	friend bool operator==(Randomiterator<V> const& larg, Randomiterator<V> const&rarg);
+	template<class V>
+	friend bool operator!=(Randomiterator<V> const& larg, Randomiterator<V> const&rarg);
+	template<class V>
+	friend bool operator>(Randomiterator<V> const& larg, Randomiterator<V> const&rarg);
+	template<class V>
+	friend bool operator>=(Randomiterator<V> const& larg, Randomiterator<V> const&rarg);
+	template<class V>
+	friend bool operator<(Randomiterator<V> const& larg, Randomiterator<V> const&rarg);
+	template<class V>
+	friend bool operator<=(Randomiterator<V> const& larg, Randomiterator<V> const&rarg);
 
 	friend class My_class<T>;
 };
@@ -68,7 +76,7 @@ public:
 	Reverse_Iterator& operator=( const Reverse_Iterator& other );
 	reference operator*() const;
 	pointer operator->() const;
-	reference operator[]( difference_type n ) const;
+	reference operator[](difference_type n) const;
 	Reverse_Iterator& operator++();
 	Reverse_Iterator operator++(int);
 	Reverse_Iterator& operator--();
@@ -77,11 +85,36 @@ public:
 	Reverse_Iterator operator-(difference_type n) const;
 	Reverse_Iterator& operator+=(difference_type n);
 	Reverse_Iterator& operator-=(difference_type n);
+
+	/* ************  Non-member functions  *****************/
+	template <class Iterator>
+	friend bool operator==(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+
+	template <class Iterator>
+	friend bool operator!=(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+
+	template <class Iterator>
+	friend bool operator<(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+
+	template <class Iterator>
+	friend bool operator<=(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+
+	template <class Iterator>
+	friend bool operator>(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+
+	template <class Iterator>
+	friend bool operator>=(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+
+	//template <class Iterator>
+	//friend Reverse_Iterator<Iterator> operator+(difference_type n, const Reverse_Iterator<Iterator>& rev_it);
+
+	//template <class Iterator>
+	//friend difference_type operator-(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
 };
 
 
 
-#include"Iterator.inl"
+#include"Iterator.cpp"
 
 #endif
 

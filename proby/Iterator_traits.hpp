@@ -11,4 +11,14 @@ struct iterator_traits
 	typedef typename _Iter::iterator_category	iterator_category;
 };
 
+template<bool B, typename T = void>
+struct enable_if {};
+
+template<typename T>
+struct enable_if<true, T>
+{
+	typedef T  type;
+};
+
+
 #endif

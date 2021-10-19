@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <memory>
+#include"Iterator_traits.hpp"
+
 
 template<class T>
 class Randomiterator;
@@ -17,6 +19,7 @@ public:
 	typedef Randomiterator<T>								iterator;
 	typedef Randomiterator<const T>							const_iterator;
 	typedef Reverse_Iterator<iterator>						reverse_iterator;
+	typedef Reverse_Iterator<const_iterator>				const_reverse_iterator;
 	typedef size_t											size_type;
 	typedef Alloc											allocator_type;
 	typedef typename std::allocator<T>::reference			reference;
@@ -25,16 +28,18 @@ public:
 	typedef typename std::allocator<T>::const_pointer		const_pointer;
 
 private:
-	Alloc	alloc;
-	pointer		ptr;
-	size_type	_size; //количество элементов в массиве (векторе)
-	size_type	_capacity; //размер аллоцированной памяти
+	allocator_type	alloc;
+	pointer			ptr;
+	size_type		_size; //количество элементов в массиве (векторе)
+	size_type		_capacity; //размер аллоцированной памяти
 public:
 /* ************  Construct vector  *****************/
 	explicit My_class(const std::allocator<T>& al = Alloc()); /*пустой конструктор (по умолчанию)*/
 	explicit My_class(size_type const& size, const T& val = T(),const std::allocator<T>& al = std::allocator<T>());
-	//template <class InputIterator>
-	//My_class (InputIterator first, InputIterator last, const std::allocator<T>& al = Alloc());
+	template <class InputIterator>
+	My_class (InputIterator first,
+			typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
+			const std::allocator<T>& al = Alloc());
 	My_class(const My_class& x);
 
 /* ************  Vector destructor  *****************/
@@ -47,7 +52,8 @@ public:
 	void assign( size_type count, const T& value );
 
 	template <class InputIterator>
-	void assign (InputIterator first, InputIterator last);
+	void assign (InputIterator first,
+			typename std::enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last);
 
 
 /* ************  ITETATORS:  *****************/
@@ -59,10 +65,10 @@ public:
 	const_iterator end() const;
 
 /*==============  rbegin, rend  ================*/
-	//iterator rbegin();
-	//iterator rend();
-	//const_iterator rbegin() const;
-	//const_iterator rend() const;
+	reverse_iterator rbegin();
+	const_reverse_iterator rbegin() const;
+	reverse_iterator rend();
+	const_reverse_iterator rend() const;
 
 	T& operator [](size_type pos);
 	T const& operator[](size_type pos) const;
@@ -142,11 +148,12 @@ template<class V, class Al>
 friend bool operator>(const My_class<V, Al>& lhs, const My_class<V, Al>& );
 template<class V, class Al>
 friend bool operator>=(const My_class<V, Al>& lhs, const My_class<V, Al>& );
-
+template<class V, class Al>
+friend void swap(std::vector<V,Al>& lhs, std::vector<V,Al>& rhs);
 };
 
 
-#include "Vector.inl"
+#include "Vector.cpp"
 
 #endif
 
