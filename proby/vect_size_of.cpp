@@ -1,9 +1,9 @@
 #include <iostream>
-#include <vector>
+#include <My_class>
 
 int main(void)
 {
-	std::vector<double>	v(1);
+	std::My_class<double>	v(1);
 	v.push_back(10);
 	int				s = sizeof(v);
 	std::cout << "s = " << s << std::endl;

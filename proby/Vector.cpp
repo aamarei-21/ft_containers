@@ -17,7 +17,7 @@ void	ft_swap(T& larg, T& rarg){
 	rarg = temp_arg;
 }
 
-/* ************  Construct vector  *****************/
+/* ************  Construct My_class  *****************/
 
 template <class T, class Alloc>
 inline My_class<T, Alloc>::My_class(const std::allocator<T>& al)
@@ -54,7 +54,7 @@ inline My_class<T, Alloc>::My_class(const My_class& x) : alloc(x.alloc), _size(x
 		alloc.construct(ptr + i, x[i]);
 }
 
-/* ************  Vector destructor  *****************/
+/* ************  My_class destructor  *****************/
 
 template <class T, class Alloc>
 inline My_class<T, Alloc>::~My_class() {
@@ -179,10 +179,10 @@ inline void My_class<T, Alloc>::push_back(T const& value)
 
 
 template <class T, class Alloc>
-inline T& My_class<T, Alloc>:: operator[](typename My_class<T, Alloc>::size_type pos) { return *(ptr + pos); }
+inline typename My_class<T, Alloc>::reference My_class<T, Alloc>::operator[](typename My_class<T, Alloc>::size_type pos) { return *(ptr + pos); }
 
 template <class T, class Alloc>
-inline T const& My_class<T, Alloc>:: operator[](typename My_class<T, Alloc>::size_type pos) const { return *(ptr + pos); }
+inline typename My_class<T, Alloc>::const_reference My_class<T, Alloc>:: operator[](typename My_class<T, Alloc>::size_type pos) const { return *(ptr + pos); }
 
 /* ************  clear()  *****************/
 template<class T, class Alloc>
@@ -282,14 +282,14 @@ typename My_class<T, Alloc>::const_pointer My_class<T, Alloc>::data() const { re
 template<class T, class Alloc>
 typename My_class<T, Alloc>::reference My_class<T, Alloc>::at(typename My_class<T, Alloc>::size_type pos ){
 	if(pos >= _size || pos < 0)
-		throw std::out_of_range("vector");
+		throw std::out_of_range("My_class");
 	return *(ptr + pos);
 }
 
 template<class T, class Alloc>
 typename My_class<T, Alloc>::const_reference My_class<T, Alloc>::at(typename My_class<T, Alloc>::size_type pos) const{
 	if(pos >= _size || pos < 0)
-		throw std::out_of_range("Vector");
+		throw std::out_of_range("My_class");
 	return *(ptr + pos);
 }
 
@@ -430,6 +430,9 @@ inline bool operator<(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs
 	for(typename My_class<T, Alloc>::size_type i = 0; i < lhs.size(); ++i){
 		if ((rit_b + i) != rhs.end() && *(lit_b + i) < *(rit_b + i))
 			return true;
+		else if (*(lit_b + i) > *(rit_b + i)){
+			return false;
+		}
 	}
 	return false;
 }
@@ -438,18 +441,12 @@ template< class T, class Alloc >
 inline bool operator<=(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs){ return !(lhs > rhs); }
 
 template< class T, class Alloc >
-inline bool operator>(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs){
-	typename My_class<T, Alloc>::const_iterator lit_b = lhs.begin();
-	typename My_class<T, Alloc>::const_iterator rit_b = rhs.begin();
-	for(typename My_class<T, Alloc>::size_type i = 0; i < lhs.size(); ++i){
-		if ((rit_b + i) == rhs.end() || *(lit_b + i) > *(rit_b + i))
-			return true;
-	}
-	return false;
-}
+inline bool operator>(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs){ return rhs < lhs; }
 
 template< class T, class Alloc >
 inline bool operator>=(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs){ return !(lhs < rhs); }
 
 template<class T, class Alloc>  /**************** НАДО ПРОВЕРИТЬ *******************/
-void swap(std::vector<T,Alloc>& lhs, std::vector<T,Alloc>& rhs){ lhs.swap(rhs); }
+void swap(My_class<T,Alloc>& lhs, My_class<T,Alloc>& rhs){ lhs.swap(rhs); }
+
+

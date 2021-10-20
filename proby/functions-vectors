@@ -28,4 +28,4 @@
 		//operator<=
 		//operator>
 		//operator>=
-//std::swap(std::vector)           - ПРОВЕРИТЬ
+//std::swap(std::My_class)           - ПРОВЕРИТЬ

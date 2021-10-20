@@ -6,7 +6,7 @@
 #include"Iterator_traits.hpp"
 
 
-template<class T>
+template<class T, bool isConst>
 class Randomiterator;
 
 template< class Iter >
@@ -16,8 +16,8 @@ template <class T, class Alloc = std::allocator<T> >
 class My_class
 {
 public:
-	typedef Randomiterator<T>								iterator;
-	typedef Randomiterator<const T>							const_iterator;
+	typedef Randomiterator<T, false>						iterator;
+	typedef Randomiterator<const T, true>					const_iterator;
 	typedef Reverse_Iterator<iterator>						reverse_iterator;
 	typedef Reverse_Iterator<const_iterator>				const_reverse_iterator;
 	typedef size_t											size_type;
@@ -33,7 +33,7 @@ private:
 	size_type		_size; //количество элементов в массиве (векторе)
 	size_type		_capacity; //размер аллоцированной памяти
 public:
-/* ************  Construct vector  *****************/
+/* ************  Construct My_class  *****************/
 	explicit My_class(const std::allocator<T>& al = Alloc()); /*пустой конструктор (по умолчанию)*/
 	explicit My_class(size_type const& size, const T& val = T(),const std::allocator<T>& al = std::allocator<T>());
 	template <class InputIterator>
@@ -42,7 +42,7 @@ public:
 			const std::allocator<T>& al = Alloc());
 	My_class(const My_class& x);
 
-/* ************  Vector destructor  *****************/
+/* ************  My_class destructor  *****************/
 	~My_class();
 
 /* ************  operator=  *****************/
@@ -70,8 +70,8 @@ public:
 	reverse_iterator rend();
 	const_reverse_iterator rend() const;
 
-	T& operator [](size_type pos);
-	T const& operator[](size_type pos) const;
+	reference operator [](size_type pos);
+	const_reference operator[](size_type pos) const;
 
 	void push_back(T const& value);
 
@@ -149,12 +149,15 @@ friend bool operator>(const My_class<V, Al>& lhs, const My_class<V, Al>& );
 template<class V, class Al>
 friend bool operator>=(const My_class<V, Al>& lhs, const My_class<V, Al>& );
 template<class V, class Al>
-friend void swap(std::vector<V,Al>& lhs, std::vector<V,Al>& rhs);
+
+friend void swap(My_class<V,Al>& lhs, My_class<V,Al>& rhs);
 };
 
 
 #include "Vector.cpp"
 
+
 #endif
+
 
 

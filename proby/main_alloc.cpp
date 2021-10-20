@@ -32,42 +32,70 @@ std::ostream& operator<<(std::ostream& out, Proba const arg)
 	return out;
 }
 
+class A {
+public:
+   int i;
+   int *a;
+
+   void print() const {
+      for (int c = 0; c < 5; c++)
+         std::cout << a[c] << std::endl;
+   }
+   A() : i(1), a(new int[5]()) {
+      for (int c = 0; c < 5; c++)
+         a[c] = c;
+      std::cout << "const" << std::endl; };
+   A(A const &r) : i(r.i), a(new int[5]()) {
+      for (int t = 0; t < 5; t++)
+         a[t] = r.a[t];
+      std::cout << "copy const" << std::endl; };
+   ~A() { std::cout << "des" << std::endl; delete [] a; }
+};
+
 int main()
 {
 
-	std::vector<int> f(6, 9);
-	f[2] = 155;
-	std::vector<int> mv(f.begin(), f.end());
-	std::vector<int>::reverse_iterator f_it_b = f.rbegin();
-	std::vector<int>::reverse_iterator f_it_e = f.rend();
+	std::vector<A> f(6, A());
+	int d = 8;
 
-	f_it_b = 2 + f_it_b;
-	std::cout << (f_it_e - f_it_b) << std::endl;
+	f.resize(d);
+
+	std::cout << f.size() << std::endl;
+	std::cout << f.capacity() << std::endl;
+
+	//f[2] = 155;
+	//::My_class<const int> mv(f.begin(), f.end());
+	//::My_class<int>::const_iterator f_it_b = f.begin();
+	//::My_class<int>::const_iterator f_it_e = f.end();
+	//::My_class<int>::const_iterator f_it = 2 + f_it_b;
+
+	//f_it_e = 2 + f_it_b;
+	//std::cout << (f_it_b == f_it_e) << std::endl;
 
 	//f.insert(f_it_b, 155);
 
 
 
 
-	//std::vector<int>::iterator f_it_e = f.end();
+	//std::My_class<int>::iterator f_it_e = f.end();
 	//f_it_b[3] = 155;
 	//f_it_b += 3;
 	//std::cout << (++f_it_b + 2 < f_it_e) << std::endl;
-	//std::vector<int>::iterator f_it_e = f.end();
-	//std::vector<int> s(4, 12);
+	//std::My_class<int>::iterator f_it_e = f.end();
+	//std::My_class<int> s(4, 12);
 	//s.push_back(7);
 
 	//s.swap(f);
 	//s[1] = 5;
 	//std::cout << (s > f) << std::endl;
-	//std::vector<int>::iterator it;
+	//std::My_class<int>::iterator it;
 	//f.push_back(8);
 
-	//for(std::vector<int>::iterator it = f_it_b; it != f_it_e; ++it)
+	//for(std::My_class<int>::iterator it = f_it_b; it != f_it_e; ++it)
 	//	std::cout <<*it << ", ";
 	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl << std::endl;
 
-	//for(std::vector<int>::iterator it = s.begin(); it != s.end(); ++it)
+	//for(std::My_class<int>::iterator it = s.begin(); it != s.end(); ++it)
 	//	std::cout <<*it << ", ";
 	//std::cout << std::endl << "s.size() = " << s.size() << ", s.capacity() = " << s.capacity() << std::endl << std::endl;
 	//std::cout << s[5] << std::endl;
@@ -75,18 +103,18 @@ int main()
 
 	//f.insert(f.begin()-2, s.begin(), s.end());
 
-	//for(std::vector<int>::iterator it = f.begin(); it != f.end(); ++it)
+	//for(std::My_class<int>::iterator it = f.begin(); it != f.end(); ++it)
 	//	std::cout << *it <<", ";
 	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl<< std::endl;
 	//std::cout << *it << std::endl;
 
 	//f.push_back(1000);
-	//for(std::vector<int>::iterator it = f.begin(); it != f.end(); ++it)
+	//for(std::My_class<int>::iterator it = f.begin(); it != f.end(); ++it)
 	//	std::cout << *it <<", ";
 	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl<< std::endl;
 
 	//it = f.erase(f.begin() +2, f.begin() +2);
-	//for(std::vector<int>::iterator it = f.begin(); it != f.end(); ++it)
+	//for(std::My_class<int>::iterator it = f.begin(); it != f.end(); ++it)
 	//	std::cout << *it <<", ";
 	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl;
 	//std::cout << "*it = " << *it << std::endl << f[5] << std::endl;
@@ -95,7 +123,7 @@ int main()
 
 	//f.pop_back();
 
-	//for(std::vector<int>::iterator it = f.begin(); it != f.end() + 8; ++it)
+	//for(std::My_class<int>::iterator it = f.begin(); it != f.end() + 8; ++it)
 	//	std::cout << *it <<", ";
 	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl;
 	//std::cout << f[10] << std::endl;

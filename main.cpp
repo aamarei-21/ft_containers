@@ -4,12 +4,12 @@
 #if 1 //CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
-	#include <vector>
+	#include <My_class>
 	namespace ft = std;
 #else
 	#include <map.hpp>
 	#include <stack.hpp>
-	#include <vector.hpp>
+	#include <My_class.hpp>
 #endif
 
 #include <stdlib.h>
@@ -55,32 +55,32 @@ int main(int argc, char** argv) {
 	const int seed = atoi(argv[1]);
 	srand(seed);
 
-	ft::vector<std::string> vector_str;
-	ft::vector<int> vector_int;
+	ft::My_class<std::string> My_class_str;
+	ft::My_class<int> My_class_int;
 	ft::stack<int> stack_int;
-	ft::vector<Buffer> vector_buffer;
+	ft::My_class<Buffer> My_class_buffer;
 	ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
 	ft::map<int, int> map_int;
 
 	for (int i = 0; i < COUNT; i++)
 	{
-		vector_buffer.push_back(Buffer());
+		My_class_buffer.push_back(Buffer());
 	}
 
 	for (int i = 0; i < COUNT; i++)
 	{
 		const int idx = rand() % COUNT;
-		vector_buffer[idx].idx = 5;
+		My_class_buffer[idx].idx = 5;
 	}
-	ft::vector<Buffer>().swap(vector_buffer);
+	ft::My_class<Buffer>().swap(My_class_buffer);
 
 	try
 	{
 		for (int i = 0; i < COUNT; i++)
 		{
 			const int idx = rand() % COUNT;
-			vector_buffer.at(idx);
-			std::cerr << "Error: THIS VECTOR SHOULD BE EMPTY!!" <<std::endl;
+			My_class_buffer.at(idx);
+			std::cerr << "Error: THIS My_class SHOULD BE EMPTY!!" <<std::endl;
 		}
 	}
 	catch(const std::exception& e)

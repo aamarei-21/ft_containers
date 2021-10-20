@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector>
+#include <My_class>
 #include <set>
 #include <list>
 #include <map>
@@ -46,11 +46,11 @@ void switc_iter(Iterator& _Iter)
 }
 int main(void)
 {
-	std::vector<int> v(5);
+	std::My_class<int> v(5);
 	std::set<int> s;
 	std::map<int, float> m;
 	std::list<int> l;
 
-	std::vector<Proba> ::iterator it;
+	std::My_class<Proba> ::iterator it;
 	switc_iter(it);
 }

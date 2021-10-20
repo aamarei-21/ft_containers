@@ -1,5 +1,7 @@
+
 #ifndef __ITTRAITS_HPP__
 #define __ITTRAITS_HPP__
+
 
 template< class _Iter >
 struct iterator_traits
@@ -20,5 +22,28 @@ struct enable_if<true, T>
 	typedef T  type;
 };
 
+template<bool B, typename T, typename F>
+struct conditional{
+	typedef F	type;
+};
+
+template<typename T, typename F>
+struct conditional<true, T, F>{
+	typedef T	type;
+};
+
+template <class T>
+struct is_const{
+	static const bool value = false;
+};
+
+template <class T>
+struct is_const<const T>{
+	static const bool value = true;
+};
+
+
 
 #endif
+
+

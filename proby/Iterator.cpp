@@ -1,57 +1,61 @@
+
 #include "Iterator.hpp"
+
 /* ==================== Randomiterator ================*/
-template <class T>
-inline Randomiterator<T>::Randomiterator() {}
+template <class T, bool isConst>
+inline Randomiterator<T, isConst>::Randomiterator() {}
 
-template <class T>
-inline Randomiterator<T>::Randomiterator(pointer x) :  ptr(x) {}
+template <class T, bool isConst>
+inline Randomiterator<T, isConst>::Randomiterator(pointer x) :  ptr(x) {}
 
-template<class T>
-inline Randomiterator<T>::Randomiterator(const Randomiterator& iter) : ptr(iter.ptr) {}
+template<class T, bool isConst>
+inline Randomiterator<T, isConst>::Randomiterator(const Randomiterator& iter) : ptr(iter.ptr) {}
 
-template<class T>
-inline Randomiterator<T>& Randomiterator<T>::operator++() { ++ptr; return *this; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator++() { ++ptr; return *this; }
 
-template<class T>
-inline Randomiterator<T>& Randomiterator<T>::operator++(int) {Randomiterator tmp(*this); ++ptr; return tmp; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator++(int) {Randomiterator tmp(*this); ++ptr; return tmp; }
 
-template<class T>
-inline Randomiterator<T>& Randomiterator<T>::operator--() { --ptr; return *this; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator--() { --ptr; return *this; }
 
-template<class T>
-inline Randomiterator<T> Randomiterator<T>::operator--(int) {Randomiterator tmp(*this); --(*this); return tmp; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst> Randomiterator<T, isConst>::operator--(int) {Randomiterator tmp(*this); --(*this); return tmp; }
 
-template<class T>
-inline Randomiterator<T> Randomiterator<T>::operator+(size_t const& x)
+template<class T, bool isConst>
+inline Randomiterator<T, isConst> Randomiterator<T, isConst>::
+	operator+(typename Randomiterator<T, isConst>::difference_type const& x)
 {
 	Randomiterator temp(ptr);
-	std::advance(temp.ptr, x);
-	return temp;
+	return temp.ptr + x;
 }
 
-template<class T>
-inline Randomiterator<T> Randomiterator<T>::operator+=(int const& x) { ptr += x; return *this; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst> Randomiterator<T, isConst>::operator+=(int const& x) { ptr += x; return *this; }
 
-template<class T>
-inline Randomiterator<T> Randomiterator<T>::operator-(int const& x) { Randomiterator temp(ptr - x); return temp; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst> Randomiterator<T, isConst>::operator-(int const& x) { Randomiterator temp(ptr - x); return temp; }
 
-template<class T>
-inline Randomiterator<T> Randomiterator<T>::operator-=(int const& x) { ptr -= x; return *this; }
+template<class T, bool isConst>
+inline Randomiterator<T, isConst> Randomiterator<T, isConst>::operator-=(int const& x) { ptr -= x; return *this; }
 
-template<class T>
-inline T& Randomiterator<T>::operator*() { return *ptr; }
+template<class T, bool isConst>
+inline typename conditional<isConst, typename Randomiterator<T, isConst>::const_reference,
+	typename Randomiterator<T, isConst>::reference>::type Randomiterator<T, isConst>::operator*() { return *ptr; }
 
-template<class T>
-inline T* Randomiterator<T>::operator->() { return ptr; }
+template<class T, bool isConst>
+inline typename conditional<isConst, const typename Randomiterator<T, isConst>::pointer,
+	typename Randomiterator<T, isConst>:: pointer>::type Randomiterator<T, isConst>::operator->() { return ptr; }
 
-template<class T>
-inline typename Randomiterator<T>::reference Randomiterator<T>::
-		operator[](typename Randomiterator<T>::difference_type n){
+template<class T, bool isConst>
+inline typename Randomiterator<T, isConst>::reference Randomiterator<T, isConst>::
+		operator[](typename Randomiterator<T, isConst>::difference_type n){
 	return *(ptr + n);
 }
 
-template<class T>
-inline Randomiterator<T>& Randomiterator<T>::operator=(Randomiterator const& x)
+template<class T, bool isConst>
+inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator=(Randomiterator const& x)
 	{
 		if (this == &x)
 			return *this;
@@ -62,23 +66,36 @@ inline Randomiterator<T>& Randomiterator<T>::operator=(Randomiterator const& x)
 /**********************************************************************/
 /***********************  Non-member functions  ***********************/
 /**********************************************************************/
-template<class V>
-inline bool operator==(Randomiterator<V> const& larg, Randomiterator<V> const& rarg){ return larg.ptr == rarg.ptr; }
+template<class V, class _V>
+inline bool operator==(Randomiterator<V, is_const<V>::value> const& larg,
+	Randomiterator<_V, is_const<_V>::value> const& rarg){ return larg.ptr == rarg.ptr; }
 
-template<class V>
-inline bool operator!=(Randomiterator<V> const& larg, Randomiterator<V> const& rarg) { return !(larg == rarg); }
+template<class V, class _V>
+inline bool operator!=(Randomiterator<V, is_const<V>::value> const& larg,
+	Randomiterator<_V, is_const<_V>::value> const& rarg) { return !(larg == rarg); }
 
-template<class V>
-inline bool operator>(Randomiterator<V> const& larg, Randomiterator<V> const& rarg) { return larg.ptr > rarg.ptr; }
+template<class V, class _V>
+inline bool operator>(Randomiterator<V, is_const<V>::value> const& larg,
+	Randomiterator<_V, is_const<_V>::value> const& rarg) { return larg.ptr > rarg.ptr; }
 
-template<class V>
-inline bool operator>=(Randomiterator<V> const& larg, Randomiterator<V> const& rarg){ return !(larg < rarg); }
+template<class V, class _V>
+inline bool operator>=(Randomiterator<V, is_const<V>::value> const& larg,
+	Randomiterator<_V, is_const<_V>::value> const& rarg){ return !(larg < rarg); }
 
-template<class V>
-inline bool operator<(Randomiterator<V> const& larg, Randomiterator<V> const& rarg) { return larg.ptr < rarg.ptr; }
+template<class V, class _V>
+inline bool operator<(Randomiterator<V, is_const<V>::value> const& larg,
+	Randomiterator<_V, is_const<_V>::value> const& rarg) { return larg.ptr < rarg.ptr; }
 
-template<class V>
-inline bool operator<=(Randomiterator<V> const& larg, Randomiterator<V> const& rarg) { return !(larg > rarg); }
+template<class V, class _V>
+inline bool operator<=(Randomiterator<V, is_const<V>::value> const& larg,
+	Randomiterator<_V, is_const<_V>::value> const& rarg) { return !(larg > rarg); }
+
+template <class V>
+inline Randomiterator<V, is_const<V>::value> operator+(typename Randomiterator<V, is_const<V>::value>::difference_type n,
+		const Randomiterator<V, is_const<V>::value>& rev_it){
+	Randomiterator<V, is_const<V>::value> temp(rev_it.ptr);
+	return temp + n;
+}
 
 
 /*===============================================================*/
@@ -203,14 +220,6 @@ inline Reverse_Iterator<Iter>& Reverse_Iterator<Iter>::
 	inline typename Reverse_Iterator<Iterator>::difference_type operator-(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs){
 		return rhs.base() - lhs.base();
 	}
-
-
-
-
-
-
-
-
 
 
 
