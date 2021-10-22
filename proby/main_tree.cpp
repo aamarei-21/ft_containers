@@ -17,6 +17,10 @@ int main(){
 	tree.add_node(17);
 	tree.add_node(56);
 	tree.add_node(84);
+	tree.add_node(84);
+	tree.add_node(84);
+	tree.add_node(84);
+
 
 	tree.print_tree();
 	std::cout << std::endl;
