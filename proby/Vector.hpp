@@ -148,8 +148,8 @@ template<class V, class Al>
 friend bool operator>(const My_class<V, Al>& lhs, const My_class<V, Al>& );
 template<class V, class Al>
 friend bool operator>=(const My_class<V, Al>& lhs, const My_class<V, Al>& );
-template<class V, class Al>
 
+template<class V, class Al>
 friend void swap(My_class<V,Al>& lhs, My_class<V,Al>& rhs);
 };
 
