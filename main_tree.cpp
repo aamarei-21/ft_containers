@@ -1,4 +1,4 @@
-#include "BST.hpp"
+#include "proby/BST.hpp"
 
 int main(){
 	BST<int> tree;

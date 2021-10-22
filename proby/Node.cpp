@@ -35,7 +35,7 @@ inline void Node<T>::delete_node(Node* temp){
 } //delete_node(Node* temp)
 
 template<class T>
-inline Node<T>::Node() : _Val(T()),_parent(NULL), _left(NULL), _right(NULL) {}
+inline Node<T>::Node() : _Val(T()), _parent(NULL), _left(NULL), _right(NULL) {}
 
 template<class T>
 
@@ -69,26 +69,21 @@ inline Node<T>* Node<T>::serch_node(value_type const& arg) {
 
 template<class T>
 inline void Node<T>::add_node(value_type const& arg){
-	Node *temp = this;
-	if (arg < temp->_Val){
-		if (!temp->_left){
-			temp->_left = new Node(arg);
-			temp->_left->_parent = temp;
+	if (arg < this->_Val){
+		if (!this->_left){
+			this->_left = new Node(arg);
+			this->_left->_parent = this;
 		}
-		else{
-			temp = temp->_left;
-			temp->add_node(arg);
-		}
+		else
+			this->_left->add_node(arg) ;
 	}
 	else{
-		if (!temp->_right){
-			temp->_right = new Node(arg);
-			temp->_right->_parent = temp;
+		if (!this->_right){
+			this->_right = new Node(arg);
+			this->_right->_parent = this;
 		}
-		else{
-			temp = temp->_right;
-			temp->add_node(arg);
-		}
+		else
+			this->_right->add_node(arg);
 	}
 } //add_node
 
