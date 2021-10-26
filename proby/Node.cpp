@@ -94,7 +94,7 @@ inline void Node<T>::print_node(Node const *arg){
 		print_node(arg->_left);
 		std::cout << arg->_Val << " ";
 		print_node(arg->_right);
-} //print_tree
+} //print_node
 
 template<class T>
 inline void Node<T>::delete_node(value_type const& arg){

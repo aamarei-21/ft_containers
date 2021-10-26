@@ -446,7 +446,7 @@ inline bool operator>(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs
 template< class T, class Alloc >
 inline bool operator>=(const My_class<T,Alloc>& lhs, const My_class<T,Alloc>& rhs){ return !(lhs < rhs); }
 
-template<class T, class Alloc>  /**************** НАДО ПРОВЕРИТЬ *******************/
+template<class T, class Alloc>
 void swap(My_class<T,Alloc>& lhs, My_class<T,Alloc>& rhs){ lhs.swap(rhs); }
 
 
