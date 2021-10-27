@@ -12,7 +12,7 @@ class AVL{
 public:
 	typedef T	value_type;
 
-private:
+public:  //заменить на private
 	AVLNode<value_type>*		_root;
 
 public:
@@ -39,11 +39,9 @@ public:
 		if(!_root)
 			_root = new AVLNode<value_type>(arg);
 		else{
-
 			this->_root->add_node(arg);
 			while(!this->_root->is_root())
 				this->_root = this->_root->parent();
-
 		}
 	}
 
@@ -53,6 +51,19 @@ public:
 			this->_root = this->_root->parent();
 	}
 
+	AVLNode<value_type>* max(){
+		AVLNode<value_type> * temp = this->_root;
+		while(temp->_right)
+			temp = temp->_right;
+		return temp;
+	}
+
+	AVLNode<value_type>* min(){
+		AVLNode<value_type> * temp = this->_root;
+		while(temp->_left)
+			temp = temp->_left;
+		return temp;
+	}
 
 };
 

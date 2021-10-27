@@ -80,15 +80,19 @@ int main(){
 	tree.add_node(760);
 	tree.print_tree();
 	tree.add_node(758);
+	tree.print_tree();
+	tree.add_node(49);
+	tree.print_tree();
+	tree.add_node(48);
 
-//	tree.print_tree();
-//	tree.erase(486);
-//	tree.print_tree();
-//	tree.erase(47);
-//	tree.print_tree();
-//	tree.erase(397);
-//	tree.print_tree();
-//	tree.erase(785);
+	tree.print_tree();
+	tree.erase(486);
+	tree.print_tree();
+	tree.erase(47);
+	tree.print_tree();
+	tree.erase(397);
+	tree.print_tree();
+	tree.erase(785);
 
 
 //	tree.print_tree();
@@ -147,9 +151,18 @@ int main(){
 //	tree.add_node(263);
 
 
-
-
 	tree.print_tree();
+
+	std::cout << "MAX = " << tree.max()->_Val << std:: endl;
+	std::cout << "MIN = " << tree.min()->_Val << std:: endl;
+	AVLNode<int>* node = tree.max();
+	for(;node != tree.min(); node = node->decrem())
+		std::cout<< node->_Val << "   ";
+	std::cout << std::endl;
+
+
+
+
 
 	tree.print_n();
 

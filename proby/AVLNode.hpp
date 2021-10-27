@@ -55,16 +55,14 @@ public: //заменить на приват
 			H_right = Height(temp->_right);
 			if (std::abs(H_left - H_right) > 1){
 				if(H_left > H_right){//левое поддерево больше
-					if(Height(temp->_left->_left) <= Height(temp->_left->_right))
-						RightTurn(temp);
-					else
-						BigRightTurn(temp);
+					if(Height(temp->_left->_left) > Height(temp->_left->_right)) //BigRightTurn(temp);
+						LeftTurn(temp->_left);
+					RightTurn(temp);
 				}
 				else{//правое поддерево больше
-					if(Height(temp->_right->_right) >= Height(temp->_right->_left))
-						LeftTurn(temp);
-					else
-						BigRightTurn(temp);
+					if(Height(temp->_right->_right) < Height(temp->_right->_left)) //BigLeftTurn(temp);
+						RightTurn(temp->_right);
+					LeftTurn(temp);
 				}
 				return;
 			}
@@ -183,61 +181,61 @@ public:
 			LeftSubTreeRight->_parent = root;
 //		root = LeftSubTree;
 	}
-//большой правый поворот
-	void BigRightTurn(AVLNode* root){
-		AVLNode *LeftSubTree, *LeftSubTreeRight, *LeftSubTreeRight_left, *LeftSubTreeRight_right;
+//большой правый поворот - не используется
+//	void BigRightTurn(AVLNode* root){
+//		AVLNode *LeftSubTree, *LeftSubTreeRight, *LeftSubTreeRight_left, *LeftSubTreeRight_right;
+//
+//		LeftSubTree = root->_left;
+//		LeftSubTreeRight = LeftSubTree->_right;
+//		LeftSubTreeRight_left = LeftSubTreeRight->_left;
+//		LeftSubTreeRight_right = LeftSubTreeRight->_right;
+//
+//		if(root->_parent) {
+//			if (root->_parent->_left == root)
+//				root->_parent->_left = LeftSubTreeRight;
+//			else
+//				root->_parent->_right = LeftSubTreeRight;
+//		}
+//		LeftSubTreeRight->_parent = root->_parent;
+//		LeftSubTreeRight->_right = root;
+//		root->_parent = LeftSubTreeRight;
+//		root->_left = LeftSubTreeRight_right;
+//		if(LeftSubTreeRight_right)
+//			LeftSubTreeRight_right->_parent = root;
+//		LeftSubTreeRight->_left = LeftSubTree;
+//		LeftSubTree->_parent = LeftSubTreeRight;
+//		LeftSubTree->_right = LeftSubTreeRight_left;
+//		if(LeftSubTreeRight_left)
+//			LeftSubTreeRight_left->_parent = LeftSubTree;
+//	}//BigRightTurn
 
-		LeftSubTree = root->_left;
-		LeftSubTreeRight = LeftSubTree->_right;
-		LeftSubTreeRight_left = LeftSubTreeRight->_left;
-		LeftSubTreeRight_right = LeftSubTreeRight->_right;
-
-		if(root->_parent) {
-			if (root->_parent->_left == root)
-				root->_parent->_left = LeftSubTreeRight;
-			else
-				root->_parent->_right = LeftSubTreeRight;
-		}
-		LeftSubTreeRight->_parent = root->_parent;
-		LeftSubTreeRight->_right = root;
-		root->_parent = LeftSubTreeRight;
-		root->_left = LeftSubTreeRight_right;
-		if(LeftSubTreeRight_right)
-			LeftSubTreeRight_right->_parent = root;
-		LeftSubTreeRight->_left = LeftSubTree;
-		LeftSubTree->_parent = LeftSubTreeRight;
-		LeftSubTree->_right = LeftSubTreeRight_left;
-		if(LeftSubTreeRight_left)
-			LeftSubTreeRight_left->_parent = LeftSubTree;
-	}//BigRightTurn
-
-//большой левый поворот
-	void BigLeftTurn(AVLNode* root){
-		AVLNode *RightSubTree, *RightSubTreeLeft, *RightSubTreeLeft_left, *RightSubTreeLeft_right;
-
-		RightSubTree = root->_right;
-		RightSubTreeLeft = RightSubTree->_left;
-		RightSubTreeLeft_left = RightSubTreeLeft->_left;
-		RightSubTreeLeft_right = RightSubTreeLeft->_right;
-
-		if(root->_parent){
-			if(root->_parent->_left == root)
-				root->_parent->_left = RightSubTreeLeft;
-			else
-				root->_parent->_right = RightSubTreeLeft;
-		}
-		RightSubTreeLeft->_parent = root->_parent;
-		RightSubTreeLeft->_right = RightSubTree;
-		RightSubTree->_parent = RightSubTreeLeft;
-		RightSubTree->_left = RightSubTreeLeft_right;
-		if(RightSubTreeLeft_right)
-			RightSubTreeLeft_right->_parent = RightSubTree;
-		RightSubTreeLeft->_left = root;
-		root->_parent = RightSubTreeLeft;
-		root->_right = RightSubTreeLeft_left;
-		if(RightSubTreeLeft_left)
-			RightSubTreeLeft_left->_parent = root;
-	}//BigLeftTurn
+//большой левый поворот  - не используется
+//	void BigLeftTurn(AVLNode* root){
+//		AVLNode *RightSubTree, *RightSubTreeLeft, *RightSubTreeLeft_left, *RightSubTreeLeft_right;
+//
+//		RightSubTree = root->_right;
+//		RightSubTreeLeft = RightSubTree->_left;
+//		RightSubTreeLeft_left = RightSubTreeLeft->_left;
+//		RightSubTreeLeft_right = RightSubTreeLeft->_right;
+//
+//		if(root->_parent){
+//			if(root->_parent->_left == root)
+//				root->_parent->_left = RightSubTreeLeft;
+//			else
+//				root->_parent->_right = RightSubTreeLeft;
+//		}
+//		RightSubTreeLeft->_parent = root->_parent;
+//		RightSubTreeLeft->_right = RightSubTree;
+//		RightSubTree->_parent = RightSubTreeLeft;
+//		RightSubTree->_left = RightSubTreeLeft_right;
+//		if(RightSubTreeLeft_right)
+//			RightSubTreeLeft_right->_parent = RightSubTree;
+//		RightSubTreeLeft->_left = root;
+//		root->_parent = RightSubTreeLeft;
+//		root->_right = RightSubTreeLeft_left;
+//		if(RightSubTreeLeft_left)
+//			RightSubTreeLeft_left->_parent = root;
+//	}//BigLeftTurn
 
 //добавление узла
 	void add_node(value_type const& arg){
@@ -254,7 +252,9 @@ public:
 					std::cout << "Balans is error - ";
 					if(Height((this)->_left->_left) < Height((this)->_left->_right)){
 						std::cout << "Bif right Turn\n";
-						BigRightTurn(this);
+//						BigRightTurn(this);
+						LeftTurn(this->_left);
+						RightTurn((this));
 					}
 					else{
 						std::cout << "Right Turn\n";
@@ -276,7 +276,9 @@ public:
 					std::cout << "Balans is error - ";
 					if (Height((this)->_right->_right) < Height((this)->_right->_left)){
 						std::cout << "Big left Turn\n";
-						BigLeftTurn(this);
+//						BigLeftTurn(this);
+						RightTurn(this->_right);
+						LeftTurn(this);
 					}
 					else{
 						std::cout << "Left Turn\n";
@@ -285,6 +287,46 @@ public:
 				}
 			}
 		}
+	}
+
+	AVLNode* min_node(){
+		AVLNode* temp = this;
+		while(temp->_left)
+			temp = temp->_left;
+		return temp;
+	}
+
+	AVLNode* max_node(){
+		AVLNode* temp = this;
+		while(temp->_right)
+			temp = temp->_right;
+		return temp;
+	}
+
+	AVLNode* increm(){
+		AVLNode* temp = this;
+		if(temp->_right)
+			return temp->_right->min_node();
+		else if(temp->_parent && temp->_parent->_left == temp)
+			return temp->_parent;
+		else if(temp->_parent && temp->_parent->_right == temp){
+			while(temp->_parent && temp->_parent->_right == temp)
+				temp = temp->_parent;
+			}
+		return temp->_parent;
+	}
+
+	AVLNode* decrem(){
+		AVLNode* temp = this;
+		if(temp->_left)
+			return temp->_left->max_node();
+		else if(temp->_parent && temp->_parent->_right == temp)
+			return temp->_parent;
+		else if(temp->_parent && temp->_parent->_left == temp){
+			while(temp->_parent && temp->_parent->_left == temp)
+				temp = temp->_parent;
+			}
+		return temp->_parent;
 	}
 
 	bool is_root(){

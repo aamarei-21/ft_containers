@@ -1,12 +1,10 @@
-#include "proby/Vector.hpp"
+#include "Vector.hpp"
 #include <vector>
 #include <set>
 #include <list>
 #include <iostream>
-#include <string>
 #include "Iterator.hpp"
 #include "pair.hpp"
-
 
 template <class C>
 void    print(C& c)
@@ -57,15 +55,19 @@ public:
 
 int main()
 {
+	::pair<int, std::string> P(10, "Name");
+	::pair<float, std::string> P1(P);
+//	P1 = P;
+	std::cout <<P1.first << "  \n" << P1.second << std::endl;
 
-	::pair<int, string> P;
-	std::vector<A> f(6, A());
-	int d = 8;
 
-	f.resize(d);
-
-	std::cout << f.size() << std::endl;
-	std::cout << f.capacity() << std::endl;
+//	std::vector<A> f(6, A());
+//	int d = 8;
+//
+//	f.resize(d);
+//
+//	std::cout << f.size() << std::endl;
+//	std::cout << f.capacity() << std::endl;
 
 	//f[2] = 155;
 	//::My_class<const int> mv(f.begin(), f.end());
