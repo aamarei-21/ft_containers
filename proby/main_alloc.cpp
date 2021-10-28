@@ -4,7 +4,9 @@
 #include <list>
 #include <iostream>
 #include "Iterator.hpp"
-#include "pair.hpp"
+//#include "pair.hpp"
+#include "map.hpp"
+#include <map>
 
 template <class C>
 void    print(C& c)
@@ -56,9 +58,14 @@ public:
 int main()
 {
 	::pair<int, std::string> P(10, "Name");
-	::pair<float, std::string> P1(P);
+	::pair<float, std::string> P1;
 //	P1 = P;
 	std::cout <<P1.first << "  \n" << P1.second << std::endl;
+
+	::map<int, std::string> *mm;
+	::map<int, float> *mmm;
+
+	std::cout << mm << std::endl << mmm << std::endl;
 
 
 //	std::vector<A> f(6, A());

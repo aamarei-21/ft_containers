@@ -73,6 +73,7 @@ public: //заменить на приват
 public:
 	AVLNode() : _Val(T()), _parent(NULL), _left(NULL), _right(NULL), _balans(0) {}
 	AVLNode(value_type const& arg) : _Val(arg), _parent(NULL), _left(NULL), _right(NULL), _balans(0) {}
+	// нужно добавить конструктор копирования
 	~AVLNode() {
 		delete this->_left;
 		delete this->_right;
@@ -243,7 +244,7 @@ public:
 			if(!(this)->_left){
 				(this)->_left = new AVLNode(arg);
 				(this)->_left->_parent = (this);
-				(this)->_balans = 0;
+				(this)->_left->_balans = 0;
 			}
 			else{
 				this->_left->add_node(arg);
@@ -267,7 +268,7 @@ public:
 			if(!(this)->_right){
 				(this)->_right = new AVLNode(arg);
 				(this)->_right->_parent = (this);
-				(this)->_balans = 0;
+				(this)->_right->_balans = 0;
 			}
 			else{
 				this->_right->add_node(arg);

@@ -15,7 +15,7 @@ template<class T, bool isConst>
 inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator++() { ++ptr; return *this; }
 
 template<class T, bool isConst>
-inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator++(int) {Randomiterator tmp(*this); ++ptr; return tmp; }
+inline Randomiterator<T, isConst> Randomiterator<T, isConst>::operator++(int) {Randomiterator tmp(*this); ++ptr; return tmp; }
 
 template<class T, bool isConst>
 inline Randomiterator<T, isConst>& Randomiterator<T, isConst>::operator--() { --ptr; return *this; }

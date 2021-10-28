@@ -5,6 +5,7 @@
 #include <memory>
 #include"Vector.hpp"
 #include"Iterator_traits.hpp"
+#include "RBNode.hpp"
 
 template<class T, bool isConst>
 class Randomiterator : public std::iterator<std::random_access_iterator_tag, T>
@@ -25,7 +26,7 @@ public:
 	Randomiterator(pointer x);
 	Randomiterator(const Randomiterator& iter);
 	Randomiterator& operator++();
-	Randomiterator& operator++(int);
+	Randomiterator operator++(int);
 	Randomiterator& operator--();
 	Randomiterator operator--(int);
 	Randomiterator operator+(difference_type const& x);
@@ -70,6 +71,11 @@ public:
 
 	friend class My_class<T>;
 };
+
+/* ********************************************************************************* */
+/* **********************************  Reverse_Iterator **************************** */
+/* ********************************************************************************* */
+
 
 template< class Iter >
 class Reverse_Iterator
@@ -129,6 +135,58 @@ public:
 	template <class Iterator>
 	friend typename Reverse_Iterator<Iterator>::difference_type
 		operator-(const Reverse_Iterator<Iterator>& lhs, const Reverse_Iterator<Iterator>& rhs);
+};
+
+/* ******************************************************************************** */
+/* **********************************  BidirecIterator **************************** */
+/* ******************************************************************************** */
+
+
+template< class T, class P, class R > //class  bool isConst>
+class BidirecIterator : public  std::iterator<std::bidirectional_iterator_tag, T>
+{
+public:
+	typedef P									pointer;
+	typedef T									value_type;
+	typedef ptrdiff_t							difference_type;
+	typedef R									reference;
+	typedef const T&							const_reference;
+	typedef std::bidirectional_iterator_tag		iterator_category;
+	typedef RBNode<T>							node_type;
+
+private:
+	node_type*			_ptr;
+
+public:
+	BidirecIterator() {}
+	BidirecIterator(BidirecIterator const& iter) {}
+	BidirecIterator(pointer x) {}
+
+	BidirecIterator& operator=(BidirecIterator const& x) {
+		if (this != &x)
+			_ptr = x._ptr;
+		return *this;
+	}
+
+	BidirecIterator& operator++() {}
+	BidirecIterator operator++(int) {}
+	BidirecIterator& operator--() {}
+	BidirecIterator operator--(int) {}
+	reference operator*() { return _ptr->_Val; }
+	pointer operator->() { return &(_ptr->_Val) }
+
+/* ************  Non-member functions  *****************/
+
+	template< class _T, class _P, class _R >
+	friend bool operator==(BidirecIterator<_T, _P, _R> const& lhs, BidirecIterator<_T, _P, _R> const& rhs) {
+		return lhs._ptr == rhs._ptr; }
+
+	template< class _T, class _P, class _R >
+	friend bool operator!=(BidirecIterator<_T, _P, _R> const& lhs, BidirecIterator<_T, _P, _R> const& rhs) {
+		return !(lhs == rhs); }
+
+
+
 };
 
 
