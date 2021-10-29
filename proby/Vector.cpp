@@ -90,7 +90,7 @@ inline void My_class<T, Alloc>::assign( typename My_class<T, Alloc>::size_type c
 template<class T, class Alloc>
 template <class InputIterator>
 inline void My_class<T, Alloc>:: assign (InputIterator first,
-		typename std::enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last)
+		typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last)
 {
 	typename My_class<T, Alloc>::size_type	size;
 

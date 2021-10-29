@@ -159,8 +159,8 @@ private:
 
 public:
 	BidirecIterator() {}
-	BidirecIterator(BidirecIterator const& iter) {}
-	BidirecIterator(pointer x) {}
+	BidirecIterator(BidirecIterator const& iter) : _ptr(iter._ptr) {}
+	BidirecIterator(pointer x) : _ptr(x) {}
 
 	BidirecIterator& operator=(BidirecIterator const& x) {
 		if (this != &x)
@@ -168,12 +168,12 @@ public:
 		return *this;
 	}
 
-	BidirecIterator& operator++() {}
-	BidirecIterator operator++(int) {}
-	BidirecIterator& operator--() {}
-	BidirecIterator operator--(int) {}
+	BidirecIterator& operator++() { _ptr->increm(); return *this; }
+	BidirecIterator operator++(int) { BidirecIterator tmp(*this); _ptr->increm(); return tmp; }
+	BidirecIterator& operator--() { _ptr->decrem(); return *this; }
+	BidirecIterator operator--(int) { BidirecIterator tmp(*this); _ptr->decrem(); return tmp; }
 	reference operator*() { return _ptr->_Val; }
-	pointer operator->() { return &(_ptr->_Val) }
+	pointer operator->() { return &(_ptr->_Val); }
 
 /* ************  Non-member functions  *****************/
 
@@ -184,6 +184,49 @@ public:
 	template< class _T, class _P, class _R >
 	friend bool operator!=(BidirecIterator<_T, _P, _R> const& lhs, BidirecIterator<_T, _P, _R> const& rhs) {
 		return !(lhs == rhs); }
+
+
+
+};
+
+template< class Iter >
+class Reverse_BiIterator
+{
+public:
+	typedef typename iterator_traits<Iter>::iterator_category		iterator_category;
+	typedef typename iterator_traits<Iter>::value_type				value_type;
+	typedef typename iterator_traits<Iter>::difference_type			difference_type;
+	typedef typename iterator_traits<Iter>::pointer					pointer;
+	typedef typename iterator_traits<Iter>::reference				reference;
+
+private:
+	Iter	_itr;
+
+public:
+	Reverse_BiIterator() : _itr() {}
+	explicit Reverse_BiIterator(Iter x) : _itr(x) {}
+	Reverse_BiIterator(const Reverse_BiIterator& other) : _itr(other._itr) {}
+
+	Iter base() const { return _itr; }
+
+
+	Reverse_BiIterator& operator++() { --base(); return *this; }
+	Reverse_BiIterator operator++(int) { Reverse_BiIterator tmp(*this); ++(*this); return tmp; }
+	Reverse_BiIterator& operator--() { ++base(); return *this; }
+	Reverse_BiIterator operator--(int) { Reverse_BiIterator tmp(*this); --(*this); return tmp; }
+	reference operator*() { Iter temp = base(); return --temp; }
+	pointer operator->() { return &(operator*()); }
+
+	/* ************  Non-member functions  *****************/
+
+	template< class Iterator >
+	friend bool operator==(Reverse_BiIterator<Iterator> const& lhs, Reverse_BiIterator<Iterator> const& rhs)
+		{ return lhs.base() == rhs.base(); }
+
+	template< class Iterator >
+	friend bool operator!=(Reverse_BiIterator<Iterator> const& lhs, Reverse_BiIterator<Iterator> const& rhs)
+		{ return !(lhs == rhs); }
+
 
 
 

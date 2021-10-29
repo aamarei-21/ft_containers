@@ -4,7 +4,7 @@
 #include <list>
 #include <iostream>
 #include "Iterator.hpp"
-//#include "pair.hpp"
+#include "pair.hpp"
 #include "map.hpp"
 #include <map>
 
@@ -57,15 +57,33 @@ public:
 
 int main()
 {
-	::pair<int, std::string> P(10, "Name");
-	::pair<float, std::string> P1;
-//	P1 = P;
+	My_class<int> myClass;
+	pair<int, float> P(10, 10.5f);
+	pair<int, float> P1;
+	P1 = P;
 	std::cout <<P1.first << "  \n" << P1.second << std::endl;
 
-	::map<int, std::string> *mm;
-	::map<int, float> *mmm;
 
-	std::cout << mm << std::endl << mmm << std::endl;
+	map<int, int> *mm;
+
+
+	mm->insert(pair<int, int>(10, 20));
+
+	std:: cout << mm->size() << std::endl;
+
+//	mm->insert(std::pair<int, std::string>(10, "PR10"));
+//	mm->insert(std::pair<int, std::string>(15, "PR15"));
+//	mm->insert(std::pair<int, std::string>(5, "PR5"));
+
+
+//	std::map<int, float> *mmm;
+//
+//	std::cout << mm << std::endl << mmm << std::endl;
+//
+//	std::map<int, float>::iterator it;
+//	std::map<int, float>::reverse_iterator r_it;
+//
+//	it = ++it;
 
 
 //	std::vector<A> f(6, A());

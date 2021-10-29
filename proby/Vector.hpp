@@ -53,7 +53,7 @@ public:
 
 	template <class InputIterator>
 	void assign (InputIterator first,
-			typename std::enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last);
+		typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last);
 
 
 /* ************  ITETATORS:  *****************/

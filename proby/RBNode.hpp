@@ -93,6 +93,24 @@ public:
 		}
 	}
 
+	RBNode* decrem(){
+		RBNode* temp = this;
+		if(temp->_left){
+			temp = temp->_left;
+			while(temp->_right)
+				temp = temp->_right;
+			return temp;
+		}
+		else if(temp->_parent && temp->_parent->_right == temp){
+			temp = temp->_parent;
+			return temp;
+		}
+		while(temp->_parent && temp->_parent->_left == temp)
+			temp = temp->_parent;
+		temp = temp->_parent;
+		return temp;
+	}
+
 	RBNode* increm(){
 		RBNode* temp = this;
 		if(temp->_right){
@@ -101,12 +119,12 @@ public:
 				temp = temp->_left;
 			return temp;
 		}
-		else if(temp->_parent && temp-0>_parent->_left == temp)
-			return temp->_parent;
-		else if(temp->_parent && temp->_parent->_right == temp) {
-			while(temp->_parent && temp->_parent->_right == temp)
-				temp = temp->_parent;
+		else if(temp->_parent && temp->_parent->_left == temp) {
+			temp = temp->_parent;
+			return temp;
 		}
+		while(temp->_parent && temp->_parent->_right == temp)
+			temp = temp->_parent;
 		return temp->_parent;
 	}
 
@@ -115,10 +133,9 @@ public:
 
 	template<class Key,
 			class V,
-			class Compare = std::less<Key>,
-			class Allocator = std::allocator <pair<const Key, T> > >
+			class Compare,
+			class Allocator >
 	friend class map;
-
 
 };
 
