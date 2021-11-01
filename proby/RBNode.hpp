@@ -9,10 +9,12 @@
 #include <iostream>
 #include <memory>
 
-template<class T>
+template<class T, class Allocator>
 class RBNode {
 public:
-	typedef T		value_type;
+	typedef T				value_type;
+	typedef Allocator		allocator_type;
+	typedef typename allocator_type::template rebind<RBNode>::other		allocator_node;
 
 private:
 	value_type 		_Val;
@@ -20,6 +22,9 @@ private:
 	RBNode*			_left;
 	RBNode*			_right;
 	bool 			_color; // 0 - blac, 1 - red
+	allocator_node* _alloc;
+
+
 
 	RBNode* grandfather(){ //поиск дедушки
 		if(!_parent || !_parent->_parent)
@@ -39,12 +44,29 @@ private:
 public:
 	RBNode() : _Val(value_type()), _parent(NULL), _left(NULL), _right(NULL), _color(1) {}
 	RBNode(value_type const& arg) : _Val(arg), _parent(NULL), _left(NULL), _right(NULL), _color(1) {}
-	RBNode(RBNode const& other) {}
+
+	RBNode(RBNode const& other) : _alloc(other._alloc), _Val(other._Val) {  /* реализовать */
+		if (other._left){
+			this->_left = _alloc->allocate(1);
+			_alloc->construct(this->_left, *other._left);
+			this->_left->_parent = this;
+		}
+		if (other._right){
+			this->_right = _alloc->allocate(1);
+			_alloc->construct(this->_right, *other._right);
+			this->_right->_parent = this;
+		}
+	}
+
 	~RBNode(){
-		if (this->_left->_parent)
-			delete this->_left;
-		if (this->_right->_parent)
-			delete this->_right;
+		if (this->_left){
+			_alloc->destroy(this->_left);
+			_alloc->deallocate(this->_left, 1);
+		}
+		if (this->_right){
+			_alloc->destroy(this->_right);
+			_alloc->deallocate(this->_right, 1);
+		}
 	}
 
 	RBNode* min_node(){
@@ -134,7 +156,7 @@ public:
 	template<class Key,
 			class V,
 			class Compare,
-			class Allocator >
+			class Alloc >
 	friend class map;
 
 };

@@ -164,14 +164,16 @@ inline void My_class<T, Alloc>::push_back(T const& value)
 	else
 	{
 		T*	temp_ptr;
-		temp_ptr = alloc.allocate(_capacity * 2); /*аллоцируем новую память в два раза больше имеющейся*/
+		size_type temp_cap;
+		temp_cap = (_capacity == 0) ? 1 : _capacity * 2;
+		temp_ptr = alloc.allocate(temp_cap); /*аллоцируем новую память в два раза больше имеющейся*/
 		for (typename My_class<T, Alloc>::size_type i = 0; i < _capacity; ++i)
 			alloc.construct(temp_ptr + i, *(ptr + i)); /*копируем все данные в новую выделенную память*/
 		alloc.construct(temp_ptr + _size, value); /*дописываем в конец значение value*/
 		this->clear();
 		alloc.deallocate(ptr, _capacity); /* освобождаем старую память*/
 		_size = _capacity;
-		_capacity *= 2;
+		_capacity = temp_cap;
 		ptr = temp_ptr;
 	}
 	++_size;

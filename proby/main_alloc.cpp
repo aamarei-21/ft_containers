@@ -57,19 +57,42 @@ public:
 
 int main()
 {
-	My_class<int> myClass;
-	pair<int, float> P(10, 10.5f);
-	pair<int, float> P1;
-	P1 = P;
-	std::cout <<P1.first << "  \n" << P1.second << std::endl;
+
+//	::My_class<pair<int, int> > my_vec;
+//	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
+//	my_vec.push_back(pair<int, int>(10,10));
+//	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
+//	my_vec.push_back(pair<int, int>(15,15));
+//	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
+//	my_vec.push_back(pair<int, int>(20,20));
+//	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
+//	my_vec.push_back(pair<int, int>(25,25));
+//	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
+
+//	::My_class<pair<int, int> > myClass;
+//	myClass.insert(::pair<int, int>(10, 20));
+
+//	pair<int, float> P(10, 10.5f);
+//	pair<int, float> P1;
+//	P1 = P;
+//	std::cout <<P1.first << "  \n" << P1.second << std::endl;
 
 
-	map<int, int> *mm;
+	::map<int, int> mm;
+//	mm->insert(my_vec.begin(), my_vec.end() - 1);
 
 
-	mm->insert(pair<int, int>(10, 20));
+	mm.insert(::pair<int, int>(10, 20));
+	mm.insert(::pair<int, int>(20, 20));
 
-	std:: cout << mm->size() << std::endl;
+
+	mm.insert(::pair<int, int>(5, 20));
+	mm.insert(::pair<int, int>(8, 17));
+
+	std:: cout << mm.size() << std::endl;
+	::map<int,int> mmm(mm);
+
+//	delete mm;
 
 //	mm->insert(std::pair<int, std::string>(10, "PR10"));
 //	mm->insert(std::pair<int, std::string>(15, "PR15"));

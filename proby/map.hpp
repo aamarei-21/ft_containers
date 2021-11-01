@@ -10,30 +10,32 @@
 #include"Iterator_traits.hpp"
 #include <iostream>
 
-template< class T, class P, class R >
+template< class T, class P, class R, class A >
 class BidirecIterator;
 
 
 template<class Key,
 		class T,
 		class Compare = std::less<Key>,
-		class Allocator = std::allocator <RBNode<pair<const Key, T> > > >//  <RBNode<pair<const Key, T> >
+		class Allocator = std::allocator <pair<const Key, T > > >//  <RBNode<pair<const Key, T> >
 class map {
 
 public:
 	typedef Allocator													allocator_type;
 	typedef Compare														key_compare;
-	typedef RBNode<pair<const Key, T> >									node_type;
 	typedef Key															key_type;
 	typedef T															mapped_type;
 	typedef pair<const Key, T>											value_type;
-	typedef BidirecIterator<T, T*, T&>									iterator;
-	typedef BidirecIterator<T, const T*, const T&>						const_iterator;
-	typedef Reverse_BiIterator<iterator>								reverse_iterator;
-	typedef Reverse_BiIterator<const_iterator>							const_reverse_iterator;
-	typedef typename std::allocator<node_type>::pointer 				pointer;
-	typedef typename std::allocator<node_type>::const_pointer			const_pointer;
-	typedef size_t														size_type;
+	typedef RBNode<value_type, allocator_type>							node_type;
+	typedef BidirecIterator<value_type, value_type*, value_type&, allocator_type>									iterator;
+	typedef BidirecIterator<value_type, const value_type*, const value_type&, allocator_type>						const_iterator;
+	typedef Reverse_BiIterator<iterator>									reverse_iterator;
+	typedef Reverse_BiIterator<const_iterator>								const_reverse_iterator;
+	typedef typename allocator_type::template rebind<node_type>::other 					allocator_node;
+	typedef typename allocator_node::pointer								pointer;
+//	typedef typename std::allocator<node_type>::pointer 				pointer;
+	typedef typename std::allocator<node_type>::const_pointer				const_pointer;
+	typedef size_t															size_type;
 
 	class value_compare	{
 		friend class map;
@@ -48,34 +50,46 @@ public:
 	};
 
 private:
+//	tree			_tree;
 	pointer 		_root;
 	pointer 		_first;
 	pointer 		_last;
 	pointer 		_sheet;
 
-	allocator_type	alloc;
+	allocator_node	alloc;
 	key_compare 	_comp;
 	size_type 		_size;
 
 	void imaginary_nodes() {
-		_root = alloc.allocate(1);
 		_first = alloc.allocate(1);
+		alloc.construct(_first);
+		_first->_left = _first->_right = NULL;
 		_last = alloc.allocate(1);
-		_sheet = alloc.allocate(1);
+		alloc.construct(_last);
+		_last->_left = _last->_right = NULL;
+
 	}
+
+//	void sheet(){
+//		alloc.construct(_sheet);
+//		_sheet->_parent = _sheet->_left = _sheet->_right = NULL;
+//		_first->_color = _last->_color = _sheet->_color = 0;
+//	}
+//
 
 public:
 
 /**************************** Constructor **********************************/
 
 explicit map(const Compare& comp = key_compare(), const Allocator& alloc = Allocator()) :
-			_comp(comp), alloc(alloc), _size(0) {
+		 _root(NULL), _comp(comp), alloc(alloc), _size(0) {
 		imaginary_nodes();
 //		alloc.construct(_root, value_type());
-		_root->_left = _first;
-		_first->_parent = _root;
-		_root->_right = _last;
-		_last->_parent = _root;
+//		_root->_left = _first;
+//		_first->_parent = _root;
+//		_root->_right = _last;
+//		_last->_parent = _root;
+
 	}
 
 	template <class InputIterator>
@@ -89,15 +103,22 @@ explicit map(const Compare& comp = key_compare(), const Allocator& alloc = Alloc
 	}
 
 
-		 map (const map& x) {}; /*необходимо реализовать*/
+	map (const map& x) :  _root(NULL), _comp(x._comp), alloc(x.alloc), _size(x._size){
+		if (x._root){
+			_root = alloc.allocate(1);
+			alloc.construct(_root, *x._root);
+		}
+	}
 
 /**************************** Destructor **********************************/
 
 	~map() {
-		delete _root;
-		delete _first;
-		delete _last;
-		delete _sheet;
+		alloc.destroy(_root);
+		alloc.deallocate(_root, 1);
+//		alloc.destroy(_first);
+//		alloc.deallocate(_first, 1);
+//		alloc.destroy(_last);
+//		alloc.deallocate(_last, 1);
 	}
 
 /**************************** Iterators **********************************/
@@ -135,37 +156,45 @@ explicit map(const Compare& comp = key_compare(), const Allocator& alloc = Alloc
 /**************************** Modifiers **********************************/
 
 
-pointer make_head(value_type& val){
-	pointer ptr = alloc.allocate(1);
-	alloc.construct(ptr, val);
-	ptr->_left = _first;
-	ptr->_right = _last;
-	ptr->_parent = NULL;
-	_first->_parent = _last->_parent = ptr;
+pointer make_head(const value_type& val){
+	_root = alloc.allocate(1);
+	alloc.construct(_root, val);
+	_root->_alloc = &alloc;
+	_root->_left = _first;
+	_root->_right = _last;
+	_root->_parent = NULL;
+	_first->_parent = _last->_parent = _root;
+	_root->_color = 0;
 	++_size;
-	return ptr;
+	return _root;
 }
 
-pointer make_left(value_type& val, pointer node){
+pointer make_left(const value_type& val, pointer node){
 	pointer ptr = alloc.allocate(1);
 	alloc.construct(ptr, val);
+	ptr->_alloc = &alloc;
 	ptr->_left = node->_left ;
-	ptr->_right = _sheet;
+	ptr->_right = alloc.allocate(1);
+	alloc.construct(ptr->_right);
+	ptr->_right->_color = 0;
 	if (node->_left == _first)
-		_first = ptr;
+		_first->_parent = ptr;
 	node->_left = ptr;
 	ptr->_parent = node;
 	++_size;
 	return ptr;
 }
 
-pointer make_right(value_type& val, pointer node){
+pointer make_right(const value_type& val, pointer node){
 	pointer ptr = alloc.allocate(1);
 	alloc.construct(ptr, val);
+	ptr->_alloc = &alloc;
 	ptr->_right = node->_right;
-	ptr->_left = _sheet;
-	if (node->_left == _last)
-		_last = ptr;
+	ptr->_left = alloc.allocate(1);
+	alloc.construct(ptr->_left);
+	ptr->_right->_color = 0;
+	if (node->_right == _last)
+		_last->_parent = ptr;
 	node->_right = ptr;
 	ptr->_parent = node;
 	++_size;
@@ -174,27 +203,38 @@ pointer make_right(value_type& val, pointer node){
 
 pair<iterator, bool> insert (const value_type& val) {
 	if (_size == 0)
-		return make_pair(make_head((value_type &)val), true);
+		return ::make_pair(iterator(make_head(val)), true);
 	pointer temp = _root;
-	while (temp->_left->_left){ //пока не дойдем по последнего узла (то есть за ним следует лист)
+	pointer previous;
+	while (temp->_left){ //пока не дойдем по последнего узла (то есть за ним следует лист)
+		previous = temp;
 		if (key_comp()(val.first, temp->_Val.first))
 			temp = temp->_left;
 		else if (key_comp()(temp->_Val.first, val.first))
-			temp = temp->_left;
-		else  //найдет такой же ключ как и у val
-		return (make_pair(temp, false));
+			temp = temp->_right;
 	}
-	if (temp->_parent->_left == temp)
-		return (make_pair(make_left(val, temp), true));
-	else
-		return (make_pair(make_right(val, temp), true));
+	temp = previous;
+	if (key_comp()(val.first, temp->_Val.first))
+		return (::make_pair(iterator(make_left(val, temp)), true));
+	else if (key_comp()(temp->_Val.first, val.first))
+		return (::make_pair(iterator(make_right(val, temp)), true));
+	else  //найдет такой же ключ как и у val
+		return (::make_pair(iterator(temp), false));
+	/* необходимо добавить балансировку */
 }
 
 
-//iterator insert (iterator position, const value_type& val) {}
-//
-//template <class InputIterator>
-//void insert (InputIterator first, InputIterator last){}
+iterator insert (iterator position, const value_type& val) {
+	insert(val);
+}
+
+
+template <class InputIterator>
+void insert (InputIterator first,
+			 typename enable_if <std::__is_input_iterator<InputIterator>::value, InputIterator>::type last){
+	for(; first != last; ++first)
+		insert(*first);
+}
 
 
 

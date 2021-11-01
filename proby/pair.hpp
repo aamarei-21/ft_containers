@@ -15,7 +15,9 @@ struct pair{
 	second_type 	second;
 
 	pair() : first(first_type()), second(second_type()) {}
-	pair (const pair& pr) : first(pr.first), second(pr.second) { }
+
+	template<class U1, class U2>
+	pair (const pair<U1, U2>& pr) : first(pr.first), second(pr.second) { }
 	pair (const first_type& a, const second_type& b) : first(a), second(b) {}
 
 	pair& operator= (const pair& pr){

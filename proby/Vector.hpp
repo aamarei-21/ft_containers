@@ -73,6 +73,7 @@ public:
 	reference operator [](size_type pos);
 	const_reference operator[](size_type pos) const;
 
+/* ************  push_back()  *****************/
 	void push_back(T const& value);
 
 /* ************  clear()  *****************/
