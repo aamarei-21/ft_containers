@@ -88,6 +88,11 @@ int main()
 
 	mm.insert(::pair<int, int>(5, 20));
 	mm.insert(::pair<int, int>(8, 17));
+	mm.insert(::pair<int, int>(9, 19));
+	mm.insert(::pair<int, int>(7, 7));
+	mm.insert(::pair<int, int>(3, 3));
+	mm.insert(::pair<int, int>(2, 2));
+
 
 	std:: cout << mm.size() << std::endl;
 	::map<int,int> mmm(mm);

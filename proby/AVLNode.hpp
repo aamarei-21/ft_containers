@@ -180,7 +180,6 @@ public:
 		(root)->_parent = LeftSubTree;
 		if(LeftSubTreeRight)
 			LeftSubTreeRight->_parent = root;
-//		root = LeftSubTree;
 	}
 //большой правый поворот - не используется
 //	void BigRightTurn(AVLNode* root){
