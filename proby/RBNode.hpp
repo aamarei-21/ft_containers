@@ -210,6 +210,7 @@ public:
 			node->delete_node();
 		else if (node->_color == 0 && !node->_left->_left && !node->_right->_left){ // узел черный без потомков
 			/* создать функци которая возвращает номер случая (от 1 до 6) */
+
 		}
 	}
 
