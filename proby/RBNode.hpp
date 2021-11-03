@@ -9,6 +9,8 @@
 #include <iostream>
 #include <memory>
 
+enum {BLACK, RED};
+
 template<class T, class Allocator>
 class RBNode {
 public:
@@ -16,8 +18,8 @@ public:
 	typedef Allocator		allocator_type;
 	typedef typename allocator_type::template rebind<RBNode>::other		allocator_node;
 
-private:
 	value_type 		_Val;
+private:
 	RBNode*			_parent;
 	RBNode*			_left;
 	RBNode*			_right;
@@ -39,6 +41,13 @@ private:
 		if(gr->_left == _parent)
 			return gr->_right;
 		return gr->_left;
+	}
+
+	RBNode* brother(){
+		RBNode* br = NULL;
+		if (_parent)
+			br = (this->_parent->_left == this) ? _parent->_right : _parent->_left;
+		return br;
 	}
 
 	RBNode* search_min(const RBNode& node){
@@ -138,9 +147,9 @@ public:
 
 	RBNode* decrem(){
 		RBNode* temp = this;
-		if(temp->_left){
+		if(temp->_left->_left){
 			temp = temp->_left;
-			while(temp->_right)
+			while(temp->_right->_left)
 				temp = temp->_right;
 			return temp;
 		}
@@ -156,9 +165,9 @@ public:
 
 	RBNode* increm(){
 		RBNode* temp = this;
-		if(temp->_right){
+		if(temp->_right->_left){
 			temp = temp->_right;
-			while(temp->_left)
+			while(temp->_left->_left)
 				temp = temp->_left;
 			return temp;
 		}
@@ -171,17 +180,20 @@ public:
 		return temp->_parent;
 	}
 
-	void delete_node(RBNode& node){
+	RBNode *delete_node(RBNode *node){
+		RBNode* parent = node->_parent;
 		if (node->_parent){
 			if(node->_parent->_left == node) {
 				node->_parent->_left = node->_left;
 				node->_left->_parent = node->_parent;
 				node->_left = NULL;
+				parent = parent->_left;
 			}
 			else {
 				node->_parent->_right = node->_right;
 				node->_right->_parent = node->_parent;
 				node->_right = NULL;
+				parent = parent->_right;
 			}
 		}
 		else{
@@ -191,29 +203,47 @@ public:
 		}
 		_alloc.destroy(node);
 		_alloc.deallocate(node, 1);
-
+		return parent;
 	}
+
+
 
 	RBNode* erase(){
 		RBNode* node = this;
-		if (node->_left->_left && node->_right->_left){ // узел имеет два потомка - случай 1
-			RBNode* temp = search_min(node->_right);
-			swap(node->_Val, temp->_Val);
-			node = temp;
-		}
-		if (node->_color == 0 && (node->_left->left || node->_right->_left)){ //узел черный с одним потомком
-			RBNode* temp = (node->left->_parent == node) ? node->_left : node->_right;
-			swap(node->_Val, temp->_Val);
-			temp->delete_node();
-		}
-		else if (node->_color == 1 && !node->_left->_left && !node->_right->_left) // узел красный без потомков
-			node->delete_node();
-		else if (node->_color == 0 && !node->_left->_left && !node->_right->_left){ // узел черный без потомков
-			/* создать функци которая возвращает номер случая (от 1 до 6) */
 
+
+	}
+
+
+
+
+	/* ******************* Вспомогательные функции ****************** */
+
+	int	Height(RBNode *arg ){
+		if(!arg)
+			return 0;
+		int h_left = Height(arg->_left);
+		int	h_right = Height(arg->_right);
+		if(h_left > h_right)
+			return h_left + 1;
+		else
+			return  h_right + 1;
+	}
+
+	void print_n(RBNode const* root, int n, int level){
+		if(root){
+			if(n == level) {
+				std::cout << root->_Val.first;
+				std::cout << (root->_color == RED ? 'r' : 'b') << ' ';
+			}
+			else{
+				print_n(root->_left, n, level + 1);
+				print_n(root->_right, n, level + 1);
+			}
 		}
 	}
 
+	/* ******************* Вспомогательные функции ****************** */
 
 	template<class Key,
 			class V,

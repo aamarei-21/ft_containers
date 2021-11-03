@@ -168,10 +168,10 @@ public:
 		return *this;
 	}
 
-	BidirecIterator& operator++() { _ptr->increm(); return *this; }
-	BidirecIterator operator++(int) { BidirecIterator tmp(*this); _ptr->increm(); return tmp; }
-	BidirecIterator& operator--() { _ptr->decrem(); return *this; }
-	BidirecIterator operator--(int) { BidirecIterator tmp(*this); _ptr->decrem(); return tmp; }
+	BidirecIterator& operator++() { _ptr = _ptr->increm(); return *this; }
+	BidirecIterator operator++(int) { BidirecIterator tmp(*this); _ptr = _ptr->increm(); return tmp; }
+	BidirecIterator& operator--() { _ptr = _ptr->decrem(); return *this; }
+	BidirecIterator operator--(int) { BidirecIterator tmp(*this); _ptr = _ptr->decrem(); return tmp; }
 	reference operator*() { return _ptr->_Val; }
 	pointer operator->() { return &(_ptr->_Val); }
 

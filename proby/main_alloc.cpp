@@ -94,8 +94,31 @@ int main()
 	mm.insert(::pair<int, int>(2, 2));
 
 
-	std:: cout << mm.size() << std::endl;
-	::map<int,int> mmm(mm);
+	std:: cout << "size = " << mm.size() << std::endl;
+
+
+	::map<int, int>::iterator it = mm.begin();
+	std::cout << "*it.first = " << (*it).first << std::endl;
+//	mm.erase(it);
+//	std:: cout << "size = " << mm.size() << std::endl;
+//
+//
+//	it = mm.begin();
+	++it;
+	std::cout << "*it.first = " << (*it).first << std::endl;
+	++it;
+	std::cout << "*it.first = " << (*it).first << std::endl;
+	++it;
+	std::cout << "*it.first = " << (*it).first << std::endl;
+
+//	++it;
+	mm.erase(it);
+	std:: cout << "size = " << mm.size() << std::endl;
+//	it = mm.begin();
+//	std::cout << "*it.first = " << (*it).first << std::endl;
+
+	mm.print_n();
+
 
 //	delete mm;
 

@@ -75,9 +75,9 @@ private:
 	node_type* find_node(const Key& key){
 		pointer temp = _root;
 		while (temp->_left){
-			if (key_comp()(key, temp->_left->_Val.first))
+			if (key_comp()(key, temp->_Val.first))
 				temp = temp->_left;
-			else if (key_comp()(temp->_right->_Val.first, key))
+			else if (key_comp()(temp->_Val.first, key))
 				temp = temp->_right;
 			else
 				return temp;
@@ -86,20 +86,20 @@ private:
 	}
 
 	template<class U>
-	void swap(U& left, U& right){
-		U temp = left;
+	void swap(U* left, U* right){
+		U* temp = left;
 		left = right;
 		right = temp;
 	}
 
-	node_type* search_min(const node_type& node){
+	node_type* search_min(node_type* node){
 		node_type* temp = node;
 		while (temp->_left->_left)
 			temp = temp->_left;
 		return temp;
 	}
 
-	node_type* search_max(const node_type& node){
+	node_type* search_max(node_type* node){
 		node_type* temp = node;
 		while (temp->_right->_right)
 			temp = temp->_right;
@@ -281,28 +281,119 @@ const_iterator find( const Key& key ) const;
 
 /****************************erase() **********************************/
 
+	void delete_case1(node_type* node){
+		if (node->_parent)
+			delete_case2(node);
+	}
+
+	void delete_case2(node_type* node){
+		node_type *brother = node->brother();
+		if(brother->_color == RED){
+			swap(&node->_parent->_color, &brother->_color);
+			if (node == node->_parent->_left)
+				LeftTurn(node->_parent);
+			else
+				RightTurn(node->_parent);
+		}
+		delete_case3(node);
+	}
+
+	void delete_case3(node_type* node){
+		node_type* brother = node->brother();
+		if(node->_parent->_color == BLACK and brother->_color == BLACK and
+			brother->_left->_color == BLACK and brother->_right->_color == BLACK){
+			brother->_color = RED;
+			delete_case1(node->_parent);
+		}
+		delete_case4(node);
+	}
+
+	void delete_case4(node_type* node){
+		node_type *brother = node->brother();
+		if (brother->_color == BLACK and brother->_left->_color == BLACK and
+			brother->_right->_color == BLACK and
+			node->_parent->_color == RED){
+			swap(&brother->_color, &node->_parent->_color);
+		}
+		else
+			delete_case5(node);
+	}
+
+	void delete_case5(node_type* node){
+		node_type *brother = node->brother();
+		if (brother->_color == BLACK){
+			if ((node == node->_parent->_left) and
+			brother->_right->_color == BLACK and
+			brother->_left->_color == RED){
+				brother->_color = RED;
+				brother->_left->_color = BLACK;
+				RightTurn(brother);
+			}
+		}
+		else if ((node == node->_parent->_right) and
+			brother->_left->_color == BLACK and
+			brother->_right->_color == RED){
+			brother->_color = RED;
+			brother->_right->_color = BLACK;
+			LeftTurn(brother);
+		}
+		delete_case6(node);
+	}
+
+	void delete_case6(node_type* node){
+		node_type *brother = node->brother();
+		brother->_color = node->_parent->_color;
+		node->_parent->_color = BLACK;
+		if (node == node->_parent->_left) {
+			brother->_right->_color = BLACK;
+			LeftTurn(node->_parent);
+		}
+		else{
+			brother->_left->_color = BLACK;
+			RightTurn(node->_parent);
+		}
+	}
+
+
 	void erase( iterator pos ){
 		node_type* node = find_node((*pos).first);
 		if (!node->_left)
-			return end();
-		node->erase();
+			return;
+		if (node->_left->_left and node->_right->_left){ // узел имеет два потомка - случай 1
+			node_type * temp = search_min(node->_right);
+			swap(&node->_Val, &temp->_Val);
+			node = temp;
+		}
+		if (node->_color == 0 and (node->_left->_left || node->_right->_left)){ //узел черный с одним потомком
+			node_type* temp = (node->_left->_parent == node) ? node->_left : node->_right;
+			swap(&node->_Val, &temp->_Val);
+			temp->delete_node(temp);
+		}
+		else if (node->_color == 1 and !node->_left->_left and !node->_right->_left) // узел красный без потомков
+			node->delete_node(node);
+		else if (node->_color == 0 and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
+			node = node->delete_node(node);
+			delete_case1(node);
+		}
+		--_size;
 	}
-	void erase( iterator first, iterator last );
-	size_type erase( const Key& key );
 
-/* Удаление
- 1. Если удаляемый элемент имеет два потомка, то меняем его значение со значением ближайшим большим (или меньшим).
-	Далее решаем задачу удаления элемента с 1 или 0 потомками;
- 2. Удаляемый элемент ЧЕРНЫЙ С ОДНИМ ПОТОМКОМ - (в этом случае этот потомок обязательно красный) - переносим его
- 	значение в удаляемый узел и потом его (потомка) удаляем;
- 3. Удаляемый элемент КРАСНЫЙ БЕЗ ПОТОМКОВ - просто удаляем этот узел;
- 4. Удаляемый элемент ЧЕРНЫЙ БЕЗ ПОТОМКОВ - удаляем его и вызываем балансировку для родительского узла - 6 случаев:
- 4.1. Родитель красный, левый ребенок черный с черными потомками;
- 4.2. Родитель красный, левый ребенок черный с левым красным потомком (внуком);
- 4.3. Родитель черны, левый ребенок красный, у правого внука черные правнуки;
- 4.4. Родитель черный, левый ребенок красный, у правого внука левый правнук красный;
- 4.5. Родитель черный, левый ребенок черный с правым красным внуком;
- 4.6. Родитель черный, левый ребенок черный с черными внуками. */
+//	void erase( iterator first, iterator last );
+//	size_type erase( const Key& key );
+
+	/* Удаление
+	 1. Если удаляемый элемент имеет два потомка, то меняем его значение со значением ближайшим большим (или меньшим).
+		Далее решаем задачу удаления элемента с 1 или 0 потомками;
+	 2. Удаляемый элемент ЧЕРНЫЙ С ОДНИМ ПОТОМКОМ - (в этом случае этот потомок обязательно красный) - переносим его
+		 значение в удаляемый узел и потом его (потомка) удаляем;
+	 3. Удаляемый элемент КРАСНЫЙ БЕЗ ПОТОМКОВ - просто удаляем этот узел;
+	 4. Удаляемый элемент ЧЕРНЫЙ БЕЗ ПОТОМКОВ - удаляем его и вызываем балансировку для родительского узла - 6 случаев:
+	 4.1. N - новый корень;
+	 4.2. S - красный;
+	 4.3. P, S и дети S (1 и 2) - черные;
+	 4.4. S и его дети — чёрные, но P — красный;
+	 4.5. S черный, его левый потомок - красный, а правый потомок - черный;
+	 4.6. S — чёрный, правый потомок S — красный. */
 
 
 
@@ -324,14 +415,14 @@ const_iterator find( const Key& key ) const;
 			return;
 		pointer G = ptr->grandfather();
 		pointer U = ptr->uncle();
-		if (P->_color == 1 && U->_color == 1){ //случай 3
+		if (P->_color == 1 and U->_color == 1){ //случай 3
 			std::cout << "swap color\n";
 			P->_color = 0;
 			U->_color = 0;
 			G->_color = 1;
 			balancing(G);
 		}
-		else if (P->_color == 1 && U->_color == 0){ //случай 4
+		else if (P->_color == 1 and U->_color == 0){ //случай 4
 			if (P->_parent->_left == P){ // родитель P слева от своего предка (G)
 				if (ptr->_parent->_right == ptr){
 					LeftTurn(P); // поворот влево относительно P
@@ -367,12 +458,12 @@ const_iterator find( const Key& key ) const;
 		root->_parent = RightSubTree;
 		RightSubTree->_left = root;
 		root->_right = RightSubTreeLeft;
-		if(RightSubTreeLeft && RightSubTreeLeft->_parent)
+		if(RightSubTreeLeft and RightSubTreeLeft->_parent)
 			RightSubTreeLeft->_parent = root;
 	}
 
 	void RightTurn(pointer root){
-		std::cout << "LeftTurn\n";
+		std::cout << "RightTurn\n";
 		node_type* LeftSubTree = root->_left;
 		node_type* LeftSubTreeRight = LeftSubTree->_right;
 		if (root->_parent){
@@ -385,9 +476,22 @@ const_iterator find( const Key& key ) const;
 		root->_parent = LeftSubTree;
 		LeftSubTree->_right = root;
 		root->_left = LeftSubTreeRight;
-		if (LeftSubTreeRight && LeftSubTreeRight->_parent)
+		if (LeftSubTreeRight and LeftSubTreeRight->_parent)
 			LeftSubTreeRight->_parent = root;
 	}
+
+
+
+	/* ******************* Вспомогательные функции ****************** */
+	void print_n() const{
+		int h = _root->Height(_root);
+		std::cout << "h = " << h << std::endl;
+		for (int i = 0; i < h; ++i) {
+			this->_root->print_n(_root, i, 0);
+			std::cout <<std::endl;
+		}
+	}
+	/* ******************* Вспомогательные функции ****************** */
 
 };
 
