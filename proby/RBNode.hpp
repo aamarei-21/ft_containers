@@ -232,7 +232,7 @@ public:
 
 	void print_n(RBNode const* root, int n, int level){
 		if(root){
-			if(n == level) {
+			if(n == level && root->_left) {
 				std::cout << root->_Val.first;
 				std::cout << (root->_color == RED ? 'r' : 'b') << ' ';
 			}

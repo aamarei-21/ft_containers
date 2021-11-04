@@ -85,12 +85,70 @@ private:
 		return temp;
 	}
 
-	template<class U>
-	void swap(U* left, U* right){
-		U* temp = left;
-		left = right;
-		right = temp;
+	void swap_node(node_type* left, node_type* right){
+		node_type* temp = left;
+		if (right->_parent != left){ // узлы не являются прямыми потомками и предками друг друга
+			if (left->_parent){
+				if (left == left->_parent->_left)
+					left->_parent->_left = right;
+				else
+					left->_parent->_right = right;
+			}
+			if (right->_parent){
+				if (right == right->_parent->_left)
+					right->_parent->_left = left;
+				else
+					right->_parent->_right = left;
+			}
+			swap(&(left->_parent), &(right->_parent));
+			left->_right->_parent = right;
+			left->_left->_parent = right;
+			right->_left->_parent = left;
+			right->_right->_parent = left;
+			swap(&(left->_right), &(right->_right));
+			swap(&(left->_left), &(right->_left));
+		}
+		else{ // один узел потомок другого
+			if (right == left->_right){
+				swap(&(left->_left), &(right->_left));
+				left->_left->_parent = right;
+				right->_left->_parent = left;
+				if (left == left->_parent->_left){
+					left->_parent->_left = right;
+				}
+				else{
+					left->_parent->_right = right;
+				}
+				if (left->_right == right){
+					left->_right = right->_right;
+					right->_right->_parent = left;
+					right->_right = left;
+
+				}
+				else{
+					left->_left = right->_left;
+					right->_left = left;
+					right->_left->_parent = left;
+				}
+				right->_parent = left->_parent;
+				left->_parent = right;
+			}
+		}
+		swap(left->_color, right->_color);
 	}
+
+	template<class U>
+	void swap(U **left, U **right){
+		U* temp = *left;
+		*left = *right;
+		*right = temp;
+	}
+	template<class U>
+	void swap(U &left, U &right){
+	U temp = left;
+	left = right;
+	right = temp;
+}
 
 	node_type* search_min(node_type* node){
 		node_type* temp = node;
@@ -136,8 +194,10 @@ public:
 /**************************** Destructor **********************************/
 
 	~map() {
-		alloc.destroy(_root);
-		alloc.deallocate(_root, 1);
+		if (_size) {
+			alloc.destroy(_root);
+			alloc.deallocate(_root, 1);
+		}
 	}
 
 /**************************** Iterators **********************************/
@@ -221,8 +281,6 @@ public:
 		node->_right = ptr;
 		ptr->_parent = node;
 		++_size;
-		while (_root->_parent)
-			_root = _root->_parent;
 		balancing(ptr);
 		while (_root->_parent)
 			_root = _root->_parent;
@@ -240,6 +298,9 @@ public:
 				temp = temp->_left;
 			else if (key_comp()(temp->_Val.first, val.first))
 				temp = temp->_right;
+			else
+				return (::make_pair(iterator(temp), false));
+
 		}
 		temp = previous;
 		if (key_comp()(val.first, temp->_Val.first))
@@ -287,9 +348,9 @@ const_iterator find( const Key& key ) const;
 	}
 
 	void delete_case2(node_type* node){
-		node_type *brother = node->brother();
-		if(brother->_color == RED){
-			swap(&node->_parent->_color, &brother->_color);
+		node_type *br = node->brother();
+		if(br->_color == RED){
+			swap((node->_parent->_color), (br->_color));
 			if (node == node->_parent->_left)
 				LeftTurn(node->_parent);
 			else
@@ -299,57 +360,58 @@ const_iterator find( const Key& key ) const;
 	}
 
 	void delete_case3(node_type* node){
-		node_type* brother = node->brother();
-		if(node->_parent->_color == BLACK and brother->_color == BLACK and
-			brother->_left->_color == BLACK and brother->_right->_color == BLACK){
-			brother->_color = RED;
+		node_type* br = node->brother();
+		if(node->_parent->_color == BLACK and br->_color == BLACK and
+			br->_left->_color == BLACK and br->_right->_color == BLACK){
+			br->_color = RED;
 			delete_case1(node->_parent);
 		}
-		delete_case4(node);
+		else
+			delete_case4(node);
 	}
 
 	void delete_case4(node_type* node){
-		node_type *brother = node->brother();
-		if (brother->_color == BLACK and brother->_left->_color == BLACK and
-			brother->_right->_color == BLACK and
+		node_type *br = node->brother();
+		if (br->_color == BLACK and br->_left->_color == BLACK and
+			br->_right->_color == BLACK and
 			node->_parent->_color == RED){
-			swap(&brother->_color, &node->_parent->_color);
+			swap((br->_color), (node->_parent->_color));
 		}
 		else
 			delete_case5(node);
 	}
 
 	void delete_case5(node_type* node){
-		node_type *brother = node->brother();
-		if (brother->_color == BLACK){
+		node_type *br = node->brother();
+		if (br->_color == BLACK){
 			if ((node == node->_parent->_left) and
-			brother->_right->_color == BLACK and
-			brother->_left->_color == RED){
-				brother->_color = RED;
-				brother->_left->_color = BLACK;
-				RightTurn(brother);
+			br->_right->_color == BLACK and
+			br->_left->_color == RED){
+				br->_color = RED;
+				br->_left->_color = BLACK;
+				RightTurn(br);
 			}
 		}
 		else if ((node == node->_parent->_right) and
-			brother->_left->_color == BLACK and
-			brother->_right->_color == RED){
-			brother->_color = RED;
-			brother->_right->_color = BLACK;
-			LeftTurn(brother);
+			br->_left->_color == BLACK and
+			br->_right->_color == RED){
+			br->_color = RED;
+			br->_right->_color = BLACK;
+			LeftTurn(br);
 		}
 		delete_case6(node);
 	}
 
 	void delete_case6(node_type* node){
-		node_type *brother = node->brother();
-		brother->_color = node->_parent->_color;
+		node_type *br = node->brother();
+		br->_color = node->_parent->_color;
 		node->_parent->_color = BLACK;
 		if (node == node->_parent->_left) {
-			brother->_right->_color = BLACK;
+			br->_right->_color = BLACK;
 			LeftTurn(node->_parent);
 		}
 		else{
-			brother->_left->_color = BLACK;
+			br->_left->_color = BLACK;
 			RightTurn(node->_parent);
 		}
 	}
@@ -360,26 +422,35 @@ const_iterator find( const Key& key ) const;
 		if (!node->_left)
 			return;
 		if (node->_left->_left and node->_right->_left){ // узел имеет два потомка - случай 1
-			node_type * temp = search_min(node->_right);
-			swap(&node->_Val, &temp->_Val);
-			node = temp;
+			node_type * temp = search_max(node->_left);
+			swap_node(node, temp);
 		}
 		if (node->_color == 0 and (node->_left->_left || node->_right->_left)){ //узел черный с одним потомком
-			node_type* temp = (node->_left->_parent == node) ? node->_left : node->_right;
-			swap(&node->_Val, &temp->_Val);
-			temp->delete_node(temp);
+			node_type* temp = (node->_left->_left) ? node->_left : node->_right;
+			swap_node(node, temp);
+			if (node->_color == RED)
+				node->delete_node(node);
 		}
-		else if (node->_color == 1 and !node->_left->_left and !node->_right->_left) // узел красный без потомков
+		else if (node->_color == RED and !node->_left->_left and !node->_right->_left) // узел красный без потомков
 			node->delete_node(node);
-		else if (node->_color == 0 and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
+		else if (node->_color == BLACK and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
 			node = node->delete_node(node);
+			while (_root->_parent)
+				_root = _root->_parent;
 			delete_case1(node);
 		}
 		--_size;
+		while (_root->_parent)
+			_root = _root->_parent;
 	}
 
 //	void erase( iterator first, iterator last );
-//	size_type erase( const Key& key );
+	size_type erase( const Key& key ){
+		iterator pos = iterator(find_node(key));
+		size_type temp = _size;
+		erase(pos);
+		return temp - _size;
+	}
 
 	/* Удаление
 	 1. Если удаляемый элемент имеет два потомка, то меняем его значение со значением ближайшим большим (или меньшим).
@@ -407,41 +478,41 @@ const_iterator find( const Key& key ) const;
 	/* **************** балансировка ********************** */
 	void balancing(pointer ptr){
 		if (!ptr->_parent){
-			ptr->_color = 0;
+			ptr->_color = BLACK;
 			return;
 		}
 		pointer P = ptr->_parent;
-		if (P->_color == 0)
+		if (P->_color == BLACK)
 			return;
 		pointer G = ptr->grandfather();
 		pointer U = ptr->uncle();
-		if (P->_color == 1 and U->_color == 1){ //случай 3
+		if (P->_color == RED and U->_color == RED){ //случай 3
 			std::cout << "swap color\n";
-			P->_color = 0;
-			U->_color = 0;
-			G->_color = 1;
+			P->_color = BLACK;
+			U->_color = BLACK;
+			G->_color = RED;
 			balancing(G);
+			return;
 		}
-		else if (P->_color == 1 and U->_color == 0){ //случай 4
-			if (P->_parent->_left == P){ // родитель P слева от своего предка (G)
-				if (ptr->_parent->_right == ptr){
-					LeftTurn(P); // поворот влево относительно P
-				}
-				P->_color = 0;
-				G->_color = 1;
-				RightTurn(G); // поворот вправо отностительно G
-				return;
+		else if (P->_color == RED and U->_color == BLACK){ //случай 4
+			if (ptr == P->_right and P == G->_left){
+				LeftTurn(P);
+				ptr = ptr->_left;
 			}
-			else{ // родитель P справа от своего предка (G)
-				if (ptr->_parent->_left == ptr){
-					RightTurn(P); // поворот вправо отностительно P
-				}
-				P->_color = 0;
-				G->_color = 1;
-				LeftTurn(G); // поворот влево относителтьно G
-				return;
+			else if (ptr == P->_left and P == G->_right){
+				RightTurn(P);
+				ptr = ptr->_right;
 			}
 		}
+		P = ptr->_parent;
+		G = ptr->grandfather();
+		U = ptr->uncle();
+		P->_color = BLACK;
+		G->_color = RED;
+		if (ptr == P->_left and P == G->_left)
+			RightTurn(G);
+		else
+			LeftTurn(G);
 	}
 
 	void LeftTurn(pointer root){

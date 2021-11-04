@@ -6,6 +6,8 @@
 #include <string>
 #include "Iterator.hpp"
 #include "pair.hpp"
+#include <fstream>
+#include <string>
 
 
 template <class C>
@@ -57,15 +59,25 @@ public:
 
 int main()
 {
+	std::string line;
+	int key, pos = 0;
+	std:: ifstream kin("key.txt");
+	if (in.is_open()){
+		while (getline(in, line)){
+			key = std::stoi(substr(pos, line.find_first_of(" ", pos) - pos));
+			pos = line.find_first_of(" ", pos);
+			std:: cout << key << "  ";
+		}
+	}
 
-	::pair<int, string> P;
-	std::vector<A> f(6, A());
-	int d = 8;
-
-	f.resize(d);
-
-	std::cout << f.size() << std::endl;
-	std::cout << f.capacity() << std::endl;
+//	::pair<int, string> P;
+//	std::vector<A> f(6, A());
+//	int d = 8;
+//
+//	f.resize(d);
+//
+//	std::cout << f.size() << std::endl;
+//	std::cout << f.capacity() << std::endl;
 
 	//f[2] = 155;
 	//::My_class<const int> mv(f.begin(), f.end());

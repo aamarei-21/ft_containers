@@ -7,6 +7,8 @@
 #include "pair.hpp"
 #include "map.hpp"
 #include <map>
+#include <string>
+#include <fstream>
 
 template <class C>
 void    print(C& c)
@@ -58,6 +60,46 @@ public:
 int main()
 {
 
+	std::string line;
+	int key, pos = 0;
+	std:: ifstream kin("./key.txt");
+
+	::map<int, int> mm;
+
+
+	if (kin.is_open()){
+		while (getline(kin, line)){
+			while (pos < line.length()) {
+				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
+				pos = line.find_first_of(" ", pos + 1);
+				mm.insert(::pair<int, int>(key, key));
+			}
+		}
+	}
+
+
+	mm.print_n();
+//	mm.erase(60);
+//	mm.erase(67);
+//	mm.erase(54);
+
+
+	kin.close();
+	std:: ifstream in("./key2.txt");
+	pos = 0;
+	if (in.is_open()){
+		while (getline(in, line)){
+			while (pos < line.length()) {
+				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
+				pos = line.find_first_of(" ", pos + 1);
+				mm.erase(key);
+			}
+		}
+	}
+
+	mm.print_n();
+
+
 //	::My_class<pair<int, int> > my_vec;
 //	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
 //	my_vec.push_back(pair<int, int>(10,10));
@@ -78,137 +120,32 @@ int main()
 //	std::cout <<P1.first << "  \n" << P1.second << std::endl;
 
 
-	::map<int, int> mm;
-//	mm->insert(my_vec.begin(), my_vec.end() - 1);
-
-
-	mm.insert(::pair<int, int>(10, 20));
-	mm.insert(::pair<int, int>(20, 20));
-
-
-	mm.insert(::pair<int, int>(5, 20));
-	mm.insert(::pair<int, int>(8, 17));
-	mm.insert(::pair<int, int>(9, 19));
-	mm.insert(::pair<int, int>(7, 7));
-	mm.insert(::pair<int, int>(3, 3));
-	mm.insert(::pair<int, int>(2, 2));
-
-
-	std:: cout << "size = " << mm.size() << std::endl;
-
-
-	::map<int, int>::iterator it = mm.begin();
-	std::cout << "*it.first = " << (*it).first << std::endl;
-//	mm.erase(it);
+//	::map<int, int> mm;
+//
+//
+//	mm.insert(::pair<int, int>(10, 20));
+//	mm.insert(::pair<int, int>(20, 20));
+//
+//
+//	mm.insert(::pair<int, int>(5, 20));
+//	mm.insert(::pair<int, int>(8, 17));
+//	mm.insert(::pair<int, int>(9, 19));
+//	mm.insert(::pair<int, int>(7, 7));
+//	mm.insert(::pair<int, int>(3, 3));
+//	mm.insert(::pair<int, int>(2, 2));
+//
+//
 //	std:: cout << "size = " << mm.size() << std::endl;
 //
+//	mm.erase(10);
+//	mm.insert(::pair<int, int>(7, 7));
 //
-//	it = mm.begin();
-	++it;
-	std::cout << "*it.first = " << (*it).first << std::endl;
-	++it;
-	std::cout << "*it.first = " << (*it).first << std::endl;
-	++it;
-	std::cout << "*it.first = " << (*it).first << std::endl;
-
-//	++it;
-	mm.erase(it);
-	std:: cout << "size = " << mm.size() << std::endl;
-//	it = mm.begin();
-//	std::cout << "*it.first = " << (*it).first << std::endl;
-
-	mm.print_n();
-
-
-//	delete mm;
-
-//	mm->insert(std::pair<int, std::string>(10, "PR10"));
-//	mm->insert(std::pair<int, std::string>(15, "PR15"));
-//	mm->insert(std::pair<int, std::string>(5, "PR5"));
-
-
-//	std::map<int, float> *mmm;
-//
-//	std::cout << mm << std::endl << mmm << std::endl;
-//
-//	std::map<int, float>::iterator it;
-//	std::map<int, float>::reverse_iterator r_it;
-//
-//	it = ++it;
-
-
-//	std::vector<A> f(6, A());
-//	int d = 8;
-//
-//	f.resize(d);
-//
-//	std::cout << f.size() << std::endl;
-//	std::cout << f.capacity() << std::endl;
-
-	//f[2] = 155;
-	//::My_class<const int> mv(f.begin(), f.end());
-	//::My_class<int>::const_iterator f_it_b = f.begin();
-	//::My_class<int>::const_iterator f_it_e = f.end();
-	//::My_class<int>::const_iterator f_it = 2 + f_it_b;
-
-	//f_it_e = 2 + f_it_b;
-	//std::cout << (f_it_b == f_it_e) << std::endl;
-
-	//f.insert(f_it_b, 155);
+//	std:: cout << "size = " << mm.size() << std::endl;
 
 
 
 
-	//std::My_class<int>::iterator f_it_e = f.end();
-	//f_it_b[3] = 155;
-	//f_it_b += 3;
-	//std::cout << (++f_it_b + 2 < f_it_e) << std::endl;
-	//std::My_class<int>::iterator f_it_e = f.end();
-	//std::My_class<int> s(4, 12);
-	//s.push_back(7);
 
-	//s.swap(f);
-	//s[1] = 5;
-	//std::cout << (s > f) << std::endl;
-	//std::My_class<int>::iterator it;
-	//f.push_back(8);
-
-	//for(std::My_class<int>::iterator it = f_it_b; it != f_it_e; ++it)
-	//	std::cout <<*it << ", ";
-	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl << std::endl;
-
-	//for(std::My_class<int>::iterator it = s.begin(); it != s.end(); ++it)
-	//	std::cout <<*it << ", ";
-	//std::cout << std::endl << "s.size() = " << s.size() << ", s.capacity() = " << s.capacity() << std::endl << std::endl;
-	//std::cout << s[5] << std::endl;
-
-
-	//f.insert(f.begin()-2, s.begin(), s.end());
-
-	//for(std::My_class<int>::iterator it = f.begin(); it != f.end(); ++it)
-	//	std::cout << *it <<", ";
-	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl<< std::endl;
-	//std::cout << *it << std::endl;
-
-	//f.push_back(1000);
-	//for(std::My_class<int>::iterator it = f.begin(); it != f.end(); ++it)
-	//	std::cout << *it <<", ";
-	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl<< std::endl;
-
-	//it = f.erase(f.begin() +2, f.begin() +2);
-	//for(std::My_class<int>::iterator it = f.begin(); it != f.end(); ++it)
-	//	std::cout << *it <<", ";
-	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl;
-	//std::cout << "*it = " << *it << std::endl << f[5] << std::endl;
-
-	//f.clear();
-
-	//f.pop_back();
-
-	//for(std::My_class<int>::iterator it = f.begin(); it != f.end() + 8; ++it)
-	//	std::cout << *it <<", ";
-	//std::cout << std::endl << "f.size() = " << f.size() << ", f.capacity() = " << f.capacity() << std::endl;
-	//std::cout << f[10] << std::endl;
 
 
 
