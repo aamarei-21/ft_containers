@@ -13,18 +13,18 @@ enum {BLACK, RED};
 
 template<class T, class Allocator>
 class RBNode {
+private:
 public:
 	typedef T				value_type;
 	typedef Allocator		allocator_type;
 	typedef typename allocator_type::template rebind<RBNode>::other		allocator_node;
 
 	value_type 		_Val;
-private:
 	RBNode*			_parent;
 	RBNode*			_left;
 	RBNode*			_right;
 	bool 			_color; // 0 - black, 1 - red
-	allocator_node _alloc;
+	allocator_node alloc;
 
 
 
@@ -72,30 +72,30 @@ private:
 	}
 
 public:
-	RBNode() : _Val(value_type()), _parent(NULL), _left(NULL), _right(NULL), _color(1), _alloc() {}
-	RBNode(value_type const& arg) : _Val(arg), _parent(NULL), _left(NULL), _right(NULL), _color(1), _alloc() {}
+	RBNode() : _Val(value_type()), _parent(NULL), _left(NULL), _right(NULL), _color(1), alloc() {}
+	RBNode(value_type const& arg) : _Val(arg), _parent(NULL), _left(NULL), _right(NULL), _color(1), alloc() {}
 
-	RBNode(RBNode const& other) : _alloc(), _Val(other._Val) {  /* реализовать */
+	RBNode(RBNode const& other) : alloc(), _Val(other._Val) {  /* реализовать */
 		if (other._left){
-			this->_left = _alloc.allocate(1);
-			_alloc.construct(this->_left, *other._left);
+			this->_left = alloc.allocate(1);
+			alloc.construct(this->_left, *other._left);
 			this->_left->_parent = this;
 		}
 		if (other._right){
-			this->_right = _alloc.allocate(1);
-			_alloc.construct(this->_right, *other._right);
+			this->_right = alloc.allocate(1);
+			alloc.construct(this->_right, *other._right);
 			this->_right->_parent = this;
 		}
 	}
 
 	~RBNode(){
 		if (this->_left){
-			_alloc.destroy(this->_left);
-			_alloc.deallocate(this->_left, 1);
+			alloc.destroy(this->_left);
+			alloc.deallocate(this->_left, 1);
 		}
 		if (this->_right){
-			_alloc.destroy(this->_right);
-			_alloc.deallocate(this->_right, 1);
+			alloc.destroy(this->_right);
+			alloc.deallocate(this->_right, 1);
 		}
 	}
 
@@ -182,27 +182,39 @@ public:
 
 	RBNode *delete_node(RBNode *node){
 		RBNode* parent = node->_parent;
-		if (node->_parent){
-			if(node->_parent->_left == node) {
-				node->_parent->_left = node->_left;
-				node->_left->_parent = node->_parent;
-				node->_left = NULL;
+		if (parent){
+			if(parent->_left == node) {
+				if(!node->_right->_left) {
+					parent->_left = node->_left;
+					node->_left->_parent = parent;
+					node->_left = NULL;
+				} else{
+					parent->_left = node->_right;
+					node->_right->_parent = parent;
+					node->_right = NULL;
+				}
 				parent = parent->_left;
-			}
-			else {
-				node->_parent->_right = node->_right;
-				node->_right->_parent = node->_parent;
-				node->_right = NULL;
+			} else { // parent->_right == node
+				if (!node->_right->_left) {
+					parent->_right = node->_left;
+					node->_left->_parent = parent;
+					node->_left = NULL;
+				} else {
+					parent->_right = node->_right;
+					node->_right->_parent = parent;
+					node->_right = NULL;
+				}
 				parent = parent->_right;
 			}
 		}
 		else{
 			node->_left->_parent = node->_right; // _first указывает на _last
-			node->_right->_parent = node->_left; // _last указывает на _first
-			node->_left = node->_right = NULL;
+			node->_right->_parent = NULL; // _last указывает на NULL
+			node->_left = NULL;
+			node->_right = NULL;
 		}
-		_alloc.destroy(node);
-		_alloc.deallocate(node, 1);
+		alloc.destroy(node);
+		alloc.deallocate(node, 1);
 		return parent;
 	}
 
@@ -245,11 +257,11 @@ public:
 
 	/* ******************* Вспомогательные функции ****************** */
 
-	template<class Key,
-			class V,
-			class Compare,
-			class Alloc >
-	friend class map;
+//	template<class Key,
+//			class V,
+//			class Compare,
+//			class Alloc >
+//	friend class map;
 
 };
 

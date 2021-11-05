@@ -17,7 +17,7 @@ class BidirecIterator;
 template<class Key,
 		class T,
 		class Compare = std::less<Key>,
-		class Allocator = std::allocator <pair<const Key, T > > >//  <RBNode<pair<const Key, T> >
+		class Allocator = std::allocator <pair<const Key, T > > >
 class map {
 
 public:
@@ -38,11 +38,10 @@ public:
 	typedef size_t																						size_type;
 
 	class value_compare	{
-		friend class map;
 	protected:
 		Compare comp;
-		value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
 	public:
+		value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
 		bool operator() (const value_type& x, const value_type& y) const
 		{
 			return comp(x.first, y.first);
@@ -54,7 +53,6 @@ private:
 	pointer 		_root;
 	pointer 		_first;
 	pointer 		_last;
-	pointer 		_sheet;
 
 	allocator_node	alloc;
 	key_compare 	_comp;
@@ -63,13 +61,16 @@ private:
 	void imaginary_nodes() {
 		_first = alloc.allocate(1);
 		alloc.construct(_first);
-		_first->_left = _first->_right = NULL;
+		_first->_left = NULL;
+		_first->_right = NULL;
 		_last = alloc.allocate(1);
 		alloc.construct(_last);
-		_last->_left = _last->_right = NULL;
-		_first->_color = _last->_color = 0;
+		_last->_left = NULL;
+		_last->_right = NULL;
+		_first->_color = BLACK;
+		_last->_color = BLACK;
 		_first->_parent = _last;
-		_last->_parent = _first;
+		_last->_parent = NULL;
 	}
 
 	node_type* find_node(const Key& key){
@@ -86,18 +87,18 @@ private:
 	}
 
 	void swap_node(node_type* left, node_type* right){
-		node_type* temp = left;
+		node_type* temp;
 		if (right->_parent != left){ // узлы не являются прямыми потомками и предками друг друга
 			if (left->_parent){
-				if (left == left->_parent->_left)
+				if (left->_parent and left == left->_parent->_left)
 					left->_parent->_left = right;
-				else
+				else if (left->_parent)
 					left->_parent->_right = right;
 			}
 			if (right->_parent){
-				if (right == right->_parent->_left)
+				if (right->_parent and right == right->_parent->_left)
 					right->_parent->_left = left;
-				else
+				else if (right->_parent)
 					right->_parent->_right = left;
 			}
 			swap(&(left->_parent), &(right->_parent));
@@ -109,29 +110,30 @@ private:
 			swap(&(left->_left), &(right->_left));
 		}
 		else{ // один узел потомок другого
-			if (right == left->_right){
-				swap(&(left->_left), &(right->_left));
-				left->_left->_parent = right;
-				right->_left->_parent = left;
-				if (left == left->_parent->_left){
-					left->_parent->_left = right;
-				}
-				else{
-					left->_parent->_right = right;
-				}
-				if (left->_right == right){
-					left->_right = right->_right;
-					right->_right->_parent = left;
-					right->_right = left;
-
-				}
-				else{
-					left->_left = right->_left;
-					right->_left = left;
-					right->_left->_parent = left;
-				}
+			if (right == left->_right){ // right справа от left
+				right->_right->_parent = left;
 				right->_parent = left->_parent;
+				if (left->_parent and left == left->_parent->_left)
+					left->_parent->_left = right;
+				else if (left->_parent)
+					left->_parent->_right = right;
 				left->_parent = right;
+				left->_right = right->_right;
+				right->_right = left;
+				swap(&(left->_left->_parent), &(right->_left->_parent));
+				swap(&(left->_left), &(right->_left));
+			} else{ // right слева от left
+				right->_left->_parent = left;
+				right->_parent = left->_parent;
+				if (left->_parent and left == left->_parent->_left)
+					left->_parent->_left = right;
+				else if (left->_parent)
+					left->_parent->_right = right;
+				left->_parent = right;
+				left->_left = right->_left;
+				right->_left = left;
+				swap(&(left->_right->_parent), &(right->_right->_parent));
+				swap(&(left->_right), &(right->_right));
 			}
 		}
 		swap(left->_color, right->_color);
@@ -177,7 +179,7 @@ public:
 		map (InputIterator first,
 			 typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
 			 const Compare& comp = Compare(),
-			 const Allocator& alloc = Allocator()) : _comp(comp), alloc(alloc), _size(0) {
+			 const Allocator& alloc = Allocator()) : _root(NULL), _comp(comp), alloc(alloc), _size(0) {
 		imaginary_nodes();
 		InputIterator temp_it = first;
 		/*необходимо реализовать*/
@@ -197,7 +199,17 @@ public:
 		if (_size) {
 			alloc.destroy(_root);
 			alloc.deallocate(_root, 1);
+		} else{
+			_last->_left = NULL;
+			_last->_right = NULL;
+			_first->_left = NULL;
+			_first->_right = NULL;
+			alloc.destroy(_first);
+			alloc.destroy(_last);
+			alloc.deallocate(_first, 1);
+			alloc.deallocate(_last, 1);
 		}
+
 	}
 
 /**************************** Iterators **********************************/
@@ -236,12 +248,13 @@ public:
 
 	pointer make_head(const value_type& val){
 		_root = alloc.allocate(1);
-		alloc.construct(_root, val);
-		_root->_alloc = alloc;
+		alloc.construct (_root, val);
+//		_root->alloc = alloc;
 		_root->_left = _first;
 		_root->_right = _last;
 		_root->_parent = NULL;
-		_first->_parent = _last->_parent = _root;
+		_first->_parent = _root;
+		_last->_parent = _root;
 		_root->_color = 0;
 		++_size;
 		return _root;
@@ -250,7 +263,7 @@ public:
 	pointer make_left(const value_type& val, pointer node){
 		pointer ptr = alloc.allocate(1);
 		alloc.construct(ptr, val);
-		ptr->_alloc = alloc;
+//		ptr->alloc = alloc;
 		ptr->_left = node->_left ;
 		ptr->_right = alloc.allocate(1); // лист
 		alloc.construct(ptr->_right);
@@ -270,12 +283,12 @@ public:
 	pointer make_right(const value_type& val, pointer node){
 		pointer ptr = alloc.allocate(1);
 		alloc.construct(ptr, val);
-		ptr->_alloc = alloc;
+//		ptr->alloc = alloc;
 		ptr->_right = node->_right;
 		ptr->_left = alloc.allocate(1); // лист
 		alloc.construct(ptr->_left);
 		ptr->_left->_parent = ptr;
-		ptr->_left->_color = 0;
+		ptr->_left->_color = BLACK;
 		if (node->_right == _last)
 			_last->_parent = ptr;
 		node->_right = ptr;
@@ -307,7 +320,7 @@ public:
 			return (::make_pair(iterator(make_left(val, temp)), true));
 		else if (key_comp()(temp->_Val.first, val.first))
 			return (::make_pair(iterator(make_right(val, temp)), true));
-		else  //найдет такой же ключ как и у val
+		else  //найден такой же ключ как и у val
 			return (::make_pair(iterator(temp), false));
 	}
 
@@ -390,14 +403,13 @@ const_iterator find( const Key& key ) const;
 				br->_color = RED;
 				br->_left->_color = BLACK;
 				RightTurn(br);
+			}else if ((node == node->_parent->_right) and
+				br->_left->_color == BLACK and
+				br->_right->_color == RED) {
+					br->_color = RED;
+					br->_right->_color = BLACK;
+					LeftTurn(br);
 			}
-		}
-		else if ((node == node->_parent->_right) and
-			br->_left->_color == BLACK and
-			br->_right->_color == RED){
-			br->_color = RED;
-			br->_right->_color = BLACK;
-			LeftTurn(br);
 		}
 		delete_case6(node);
 	}
@@ -418,14 +430,15 @@ const_iterator find( const Key& key ) const;
 
 
 	void erase( iterator pos ){
-		node_type* node = find_node((*pos).first);
+		Key key = pos->first;
+		node_type* node = find_node(key);
 		if (!node->_left)
 			return;
 		if (node->_left->_left and node->_right->_left){ // узел имеет два потомка - случай 1
 			node_type * temp = search_max(node->_left);
 			swap_node(node, temp);
 		}
-		if (node->_color == 0 and (node->_left->_left || node->_right->_left)){ //узел черный с одним потомком
+		if (node->_color == BLACK and (node->_left->_left || node->_right->_left)){ //узел черный с одним потомком
 			node_type* temp = (node->_left->_left) ? node->_left : node->_right;
 			swap_node(node, temp);
 			if (node->_color == RED)
@@ -434,19 +447,24 @@ const_iterator find( const Key& key ) const;
 		else if (node->_color == RED and !node->_left->_left and !node->_right->_left) // узел красный без потомков
 			node->delete_node(node);
 		else if (node->_color == BLACK and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
+			node_type * temp = node;
 			node = node->delete_node(node);
-			while (_root->_parent)
-				_root = _root->_parent;
-			delete_case1(node);
+			if (node)
+				delete_case1(node);
+			else
+				_root = node;
 		}
 		--_size;
-		while (_root->_parent)
+		while (_root and _root->_parent)
 			_root = _root->_parent;
 	}
 
+	/* надо реализовать*/
 //	void erase( iterator first, iterator last );
+
 	size_type erase( const Key& key ){
 		iterator pos = iterator(find_node(key));
+		Key k = pos->first;
 		size_type temp = _size;
 		erase(pos);
 		return temp - _size;
@@ -555,8 +573,10 @@ const_iterator find( const Key& key ) const;
 
 	/* ******************* Вспомогательные функции ****************** */
 	void print_n() const{
+		if (!_root)
+			return;
 		int h = _root->Height(_root);
-		std::cout << "h = " << h << std::endl;
+//		std::cout << "h = " << h << std::endl;
 		for (int i = 0; i < h; ++i) {
 			this->_root->print_n(_root, i, 0);
 			std::cout <<std::endl;

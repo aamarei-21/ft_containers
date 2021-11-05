@@ -61,41 +61,53 @@ int main()
 {
 
 	std::string line;
+	char c;
 	int key, pos = 0;
 	std:: ifstream kin("./key.txt");
 
 	::map<int, int> mm;
+	mm.insert(::pair<int,int>(10, 10));
+	mm.insert(::pair<int,int>(20, 10));
+	mm.erase(20);
+	mm.erase(10);
 
 
-	if (kin.is_open()){
-		while (getline(kin, line)){
-			while (pos < line.length()) {
-				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
-				pos = line.find_first_of(" ", pos + 1);
-				mm.insert(::pair<int, int>(key, key));
-			}
-		}
-	}
-
-
-	mm.print_n();
+//	if (kin.is_open()){
+//		while (getline(kin, line)){
+//			while (pos < line.length()) {
+//				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
+//				pos = line.find_first_of(" ", pos + 1);
+//				std:: cout << "insert = " << key << std:: endl;
+//				mm.insert(::pair<int, int>(key, key));
+//				mm.print_n();
+//			}
+//		}
+//	}
+//
+//
+//	mm.print_n();
 //	mm.erase(60);
 //	mm.erase(67);
 //	mm.erase(54);
 
 
-	kin.close();
-	std:: ifstream in("./key2.txt");
-	pos = 0;
-	if (in.is_open()){
-		while (getline(in, line)){
-			while (pos < line.length()) {
-				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
-				pos = line.find_first_of(" ", pos + 1);
-				mm.erase(key);
-			}
-		}
-	}
+//	kin.close();
+//	std:: ifstream in("./key2.txt");
+//	pos = 0;
+//	if (in.is_open()){
+//		while (getline(in, line)){
+//			while (pos < line.length()) {
+//				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
+//				pos = line.find_first_of(" ", pos + 1);
+//				std:: cout << "erase = " << key << std:: endl;
+//				mm.erase(key);
+//				mm.print_n();
+////				std:: cin >> c;
+//			}
+//		}
+//	}
+
+//	mm.erase(2);
 
 	mm.print_n();
 
