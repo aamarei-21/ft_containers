@@ -75,16 +75,18 @@ public:
 	RBNode() : _Val(value_type()), _parent(NULL), _left(NULL), _right(NULL), _color(1), alloc() {}
 	RBNode(value_type const& arg) : _Val(arg), _parent(NULL), _left(NULL), _right(NULL), _color(1), alloc() {}
 
-	RBNode(RBNode const& other) : alloc(), _Val(other._Val) {  /* реализовать */
+	RBNode(RBNode const& other) :_parent(NULL), _left(NULL), _right(NULL), _color(other._color), alloc(), _Val(other._Val) {
 		if (other._left){
 			this->_left = alloc.allocate(1);
 			alloc.construct(this->_left, *other._left);
-			this->_left->_parent = this;
+			if (other._left->_parent)
+				this->_left->_parent = this;
 		}
 		if (other._right){
 			this->_right = alloc.allocate(1);
 			alloc.construct(this->_right, *other._right);
-			this->_right->_parent = this;
+			if (other._right->_parent)
+				this->_right->_parent = this;
 		}
 	}
 
@@ -147,9 +149,9 @@ public:
 
 	RBNode* decrem(){
 		RBNode* temp = this;
-		if(temp->_left->_left){
+		if(temp->_left and temp->_left->_parent){
 			temp = temp->_left;
-			while(temp->_right->_left)
+			while(temp->_right and temp->_right->_left)
 				temp = temp->_right;
 			return temp;
 		}
@@ -165,9 +167,10 @@ public:
 
 	RBNode* increm(){
 		RBNode* temp = this;
-		if(temp->_right->_left){
+		/* ????????*/
+		if(temp->_right and temp->_right->_parent){
 			temp = temp->_right;
-			while(temp->_left->_left)
+			while(temp->_left and temp->_left->_left)
 				temp = temp->_left;
 			return temp;
 		}
@@ -186,25 +189,29 @@ public:
 			if(parent->_left == node) {
 				if(!node->_right->_left) {
 					parent->_left = node->_left;
-					node->_left->_parent = parent;
+					if (node->_left->_parent)
+						node->_left->_parent = parent;
 					node->_left = NULL;
 				} else{
 					parent->_left = node->_right;
-					node->_right->_parent = parent;
+					if (node->_right->_parent)
+						node->_right->_parent = parent;
 					node->_right = NULL;
 				}
-				parent = parent->_left;
+//				parent = parent->_left;
 			} else { // parent->_right == node
 				if (!node->_right->_left) {
 					parent->_right = node->_left;
-					node->_left->_parent = parent;
+					if (node->_left->_parent)
+						node->_left->_parent = parent;
 					node->_left = NULL;
 				} else {
 					parent->_right = node->_right;
-					node->_right->_parent = parent;
+					if (node->_right->_parent)
+						node->_right->_parent = parent;
 					node->_right = NULL;
 				}
-				parent = parent->_right;
+//				parent = parent->_right;
 			}
 		}
 		else{

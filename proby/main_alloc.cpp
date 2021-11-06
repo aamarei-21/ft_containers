@@ -66,23 +66,52 @@ int main()
 	std:: ifstream kin("./key.txt");
 
 	::map<int, int> mm;
-	mm.insert(::pair<int,int>(10, 10));
-	mm.insert(::pair<int,int>(20, 10));
-	mm.erase(20);
-	mm.erase(10);
+//	mm.insert(::pair<int,int>(10, 10));
+//	mm.insert(::pair<int,int>(20, 10));
+//	mm.erase(20);
+//	mm.erase(10);
 
 
-//	if (kin.is_open()){
-//		while (getline(kin, line)){
-//			while (pos < line.length()) {
-//				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
-//				pos = line.find_first_of(" ", pos + 1);
-//				std:: cout << "insert = " << key << std:: endl;
-//				mm.insert(::pair<int, int>(key, key));
+	if (kin.is_open()){
+		while (getline(kin, line)){
+			while (pos < line.length()) {
+				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
+				pos = line.find_first_of(" ", pos + 1);
+				std:: cout << "insert = " << key << std:: endl;
+				mm.insert(::pair<int, int>(key, key));
 //				mm.print_n();
-//			}
-//		}
-//	}
+			}
+		}
+	}
+
+mm.print_n();
+
+	std:: cout << " mm: size = " << mm.size() << std:: endl;
+//	mm[12] = 112;
+//	std:: cout << mm[12] << " size = " << mm.size() << std:: endl;
+	::map<int, int>::iterator  it_b = mm.begin();
+	::map<int, int>::iterator  it_e = mm.end();
+	++it_b;
+	++it_b;
+	++it_b;
+	++it_b;
+
+	--it_e;
+	--it_e;
+	--it_e;
+	--it_e;
+	::map<int, int> m_cop(it_b, it_e);
+//	m_cop = mm;
+	std::cout <<"m_cop map:\n";
+	m_cop.print_n();
+	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
+
+	mm.swap(m_cop);
+	mm.print_n();
+	std:: cout << " mm: size = " << mm.size() << std:: endl;
+	mm.print_n();
+	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
+
 //
 //
 //	mm.print_n();
@@ -108,8 +137,8 @@ int main()
 //	}
 
 //	mm.erase(2);
-
-	mm.print_n();
+//
+//	mm.print_n();
 
 
 //	::My_class<pair<int, int> > my_vec;

@@ -37,11 +37,11 @@ public:
 	typedef typename std::allocator<node_type>::const_pointer											const_pointer;
 	typedef size_t																						size_type;
 
-	class value_compare	{
+	class value_comp	{
 	protected:
 		Compare comp;
 	public:
-		value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
+		value_comp (Compare c) : comp(c) {}  // constructed with map's comparison object
 		bool operator() (const value_type& x, const value_type& y) const
 		{
 			return comp(x.first, y.first);
@@ -86,57 +86,35 @@ private:
 		return temp;
 	}
 
-	void swap_node(node_type* left, node_type* right){
-		node_type* temp;
-		if (right->_parent != left){ // узлы не являются прямыми потомками и предками друг друга
-			if (left->_parent){
-				if (left->_parent and left == left->_parent->_left)
-					left->_parent->_left = right;
-				else if (left->_parent)
-					left->_parent->_right = right;
-			}
-			if (right->_parent){
-				if (right->_parent and right == right->_parent->_left)
-					right->_parent->_left = left;
-				else if (right->_parent)
-					right->_parent->_right = left;
-			}
-			swap(&(left->_parent), &(right->_parent));
-			left->_right->_parent = right;
-			left->_left->_parent = right;
-			right->_left->_parent = left;
-			right->_right->_parent = left;
-			swap(&(left->_right), &(right->_right));
-			swap(&(left->_left), &(right->_left));
-		}
-		else{ // один узел потомок другого
-			if (right == left->_right){ // right справа от left
-				right->_right->_parent = left;
-				right->_parent = left->_parent;
-				if (left->_parent and left == left->_parent->_left)
-					left->_parent->_left = right;
-				else if (left->_parent)
-					left->_parent->_right = right;
-				left->_parent = right;
-				left->_right = right->_right;
-				right->_right = left;
-				swap(&(left->_left->_parent), &(right->_left->_parent));
-				swap(&(left->_left), &(right->_left));
-			} else{ // right слева от left
-				right->_left->_parent = left;
-				right->_parent = left->_parent;
-				if (left->_parent and left == left->_parent->_left)
-					left->_parent->_left = right;
-				else if (left->_parent)
-					left->_parent->_right = right;
-				left->_parent = right;
-				left->_left = right->_left;
-				right->_left = left;
-				swap(&(left->_right->_parent), &(right->_right->_parent));
-				swap(&(left->_right), &(right->_right));
-			}
-		}
-		swap(left->_color, right->_color);
+	void swap_node(node_type* a, node_type* b){
+		node_type *a_left = a->_left;
+		node_type *a_right = a->_right;
+		node_type *a_parent = a->_parent;
+
+		node_type *b_left = b->_left;
+		node_type *b_right = b->_right;
+		node_type *b_parent = b->_parent;
+
+		if (a_parent and a_parent->_left == a)
+			a_parent->_left = b;
+		else if (a_parent)
+			a_parent->_right = b;
+		if (b_parent and b_parent->_left == b)
+			b_parent->_left = a;
+		else if (b_parent)
+			b_parent->_right = a;
+		if (a_left->_parent)
+			a_left->_parent = b;
+		if (a_right->_parent)
+			a_right->_parent = b;
+		if (b_left->_parent)
+			b_left->_parent = a;
+		if (b_right->_parent)
+			b_right->_parent = a;
+		swap(&(a->_left), &(b->_left));
+		swap(&(a->_right), &(b->_right));
+		swap(&(a->_parent), &(b->_parent));
+		swap(a->_color, b->_color);
 	}
 
 	template<class U>
@@ -179,15 +157,17 @@ public:
 		map (InputIterator first,
 			 typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
 			 const Compare& comp = Compare(),
-			 const Allocator& alloc = Allocator()) : _root(NULL), _comp(comp), alloc(alloc), _size(0) {
-		imaginary_nodes();
-		InputIterator temp_it = first;
-		/*необходимо реализовать*/
+			 const Allocator& alloc = Allocator() ) :
+			 _root(NULL), _comp(comp), alloc(alloc), _size(0) {
+				imaginary_nodes();
+				for (; first != last; ++first)
+					insert(*first);
 	}
 
 
 	map (const map& x) :  _root(NULL), _comp(x._comp), alloc(x.alloc), _size(x._size){
 		if (x._root){
+			imaginary_nodes();
 			_root = alloc.allocate(1);
 			alloc.construct(_root, *x._root);
 		}
@@ -207,9 +187,25 @@ public:
 			alloc.destroy(_first);
 			alloc.destroy(_last);
 			alloc.deallocate(_first, 1);
-			alloc.deallocate(_last, 1);
+//			alloc.deallocate(_last, 1);
 		}
 
+	}
+
+	/**************************** operator= **********************************/
+
+	map& operator= (const map& x){
+		if (this == &x)
+			return *this;
+		if (_root){
+			alloc.destroy(_root);
+			alloc.deallocate(_root, 1);
+		}
+		this->imaginary_nodes();
+		_root = alloc.allocate(1);
+		alloc.construct(_root, *x._root);
+		_size = x._size;
+		return *this;
 	}
 
 /**************************** Iterators **********************************/
@@ -236,11 +232,8 @@ public:
 
 /**************************** Element access **********************************/
 
-	mapped_type& operator[] (const key_type& k){/*надо реализовать*/
-//		if(k == _root->_Val.first)
-//			return _root->_Val.second;
-//		if(key_comp()(k, _root->_Val.first))
-//		return _root->_Val.second;
+	mapped_type& operator[] (const key_type& k){
+		return (*((this->insert(make_pair(k, mapped_type()))).first)).second;
 	}
 
 /**************************** Modifiers **********************************/
@@ -249,7 +242,6 @@ public:
 	pointer make_head(const value_type& val){
 		_root = alloc.allocate(1);
 		alloc.construct (_root, val);
-//		_root->alloc = alloc;
 		_root->_left = _first;
 		_root->_right = _last;
 		_root->_parent = NULL;
@@ -263,11 +255,10 @@ public:
 	pointer make_left(const value_type& val, pointer node){
 		pointer ptr = alloc.allocate(1);
 		alloc.construct(ptr, val);
-//		ptr->alloc = alloc;
 		ptr->_left = node->_left ;
 		ptr->_right = alloc.allocate(1); // лист
 		alloc.construct(ptr->_right);
-		ptr->_right->_parent = ptr;
+		ptr->_right->_parent = NULL;
 		ptr->_right->_color = 0;
 		if (node->_left == _first)
 			_first->_parent = ptr;
@@ -283,11 +274,10 @@ public:
 	pointer make_right(const value_type& val, pointer node){
 		pointer ptr = alloc.allocate(1);
 		alloc.construct(ptr, val);
-//		ptr->alloc = alloc;
 		ptr->_right = node->_right;
 		ptr->_left = alloc.allocate(1); // лист
 		alloc.construct(ptr->_left);
-		ptr->_left->_parent = ptr;
+		ptr->_left->_parent = NULL;
 		ptr->_left->_color = BLACK;
 		if (node->_right == _last)
 			_last->_parent = ptr;
@@ -351,7 +341,18 @@ public:
 		return end();
 	}
 
-const_iterator find( const Key& key ) const;
+	const_iterator find( const Key& key ) const{
+		pointer temp = _root;
+		while (temp->_left){
+			if (key_comp()(key, temp->_left->_Val.first))
+				temp = temp->_left;
+			else if (key_comp()(temp->_right->_Val.first, key))
+				temp = temp->_right;
+			else
+				return iterator(temp);
+		}
+		return end();
+	}
 
 /****************************erase() **********************************/
 
@@ -431,9 +432,22 @@ const_iterator find( const Key& key ) const;
 
 	void erase( iterator pos ){
 		Key key = pos->first;
-		node_type* node = find_node(key);
+		erase(key);
+	}
+
+	void erase( iterator first, iterator last ){
+		iterator next = first;
+		while (first != last){
+			++next;
+			erase(first);
+			first = next;
+		}
+	}
+
+	size_type erase( const Key& key ){
+		node_type *node = find_node(key);
 		if (!node->_left)
-			return;
+			return 0;
 		if (node->_left->_left and node->_right->_left){ // узел имеет два потомка - случай 1
 			node_type * temp = search_max(node->_left);
 			swap_node(node, temp);
@@ -442,32 +456,18 @@ const_iterator find( const Key& key ) const;
 			node_type* temp = (node->_left->_left) ? node->_left : node->_right;
 			swap_node(node, temp);
 			if (node->_color == RED)
-				node->delete_node(node);
+				node = node->delete_node(node);
 		}
 		else if (node->_color == RED and !node->_left->_left and !node->_right->_left) // узел красный без потомков
-			node->delete_node(node);
-		else if (node->_color == BLACK and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
-			node_type * temp = node;
 			node = node->delete_node(node);
-			if (node)
-				delete_case1(node);
-			else
-				_root = node;
+		else if (node->_color == BLACK and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
+			delete_case1(node);
+			node = node->delete_node(node);
 		}
 		--_size;
 		while (_root and _root->_parent)
 			_root = _root->_parent;
-	}
-
-	/* надо реализовать*/
-//	void erase( iterator first, iterator last );
-
-	size_type erase( const Key& key ){
-		iterator pos = iterator(find_node(key));
-		Key k = pos->first;
-		size_type temp = _size;
-		erase(pos);
-		return temp - _size;
+		return 1;
 	}
 
 	/* Удаление
@@ -485,7 +485,14 @@ const_iterator find( const Key& key ) const;
 	 4.6. S — чёрный, правый потомок S — красный. */
 
 
+/**************************** swap () **********************************/
 
+	void swap (map& x){
+		node_type * temp = this->_root;
+		this->_root = x._root;
+		x._root = temp;
+		swap(this->_size, x._size);
+	}
 
 /**************************** Observers **********************************/
 
