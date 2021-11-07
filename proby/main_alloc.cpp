@@ -66,51 +66,74 @@ int main()
 	std:: ifstream kin("./key.txt");
 
 	::map<int, int> mm;
-//	mm.insert(::pair<int,int>(10, 10));
-//	mm.insert(::pair<int,int>(20, 10));
+//	mm.insert(::pair<int,int>(0, 10));
+	mm.insert(::pair<int,int>(10, 10));
+	mm.insert(::pair<int,int>(20, 10));
+	mm.insert(::pair<int,int>(30, 10));
+	mm.insert(::pair<int,int>(40, 10));
+	mm.insert(::pair<int,int>(50, 10));
+	mm.insert(::pair<int,int>(60, 10));
+	mm.insert(::pair<int,int>(70, 10));
+	mm.insert(::pair<int,int>(80, 10));
+	mm.insert(::pair<int,int>(90, 10));
+	mm.insert(::pair<int,int>(100, 10));
+
+	::map<int, int>::iterator it;
+	::pair<map<int, int>::iterator, map<int, int>::iterator> ret;
+	it = mm.upper_bound(20);
+	std::cout << "mm.upper_bound = " << it->first << std::endl;
+
+	ret = mm.equal_range(10);
+	std::cout << "lower bound points to: ";
+	std::cout << ret.first->first << " => " << ret.first->second << '\n';
+
+	std::cout << "upper bound points to: ";
+	std::cout << ret.second->first << " => " << ret.second->second << '\n';
+
+
 //	mm.erase(20);
 //	mm.erase(10);
 
 
-	if (kin.is_open()){
-		while (getline(kin, line)){
-			while (pos < line.length()) {
-				key = std::stoi(line.substr(pos, line.find_first_of(" ", pos + 1) - pos));
-				pos = line.find_first_of(" ", pos + 1);
-				std:: cout << "insert = " << key << std:: endl;
-				mm.insert(::pair<int, int>(key, key));
-//				mm.print_n();
-			}
-		}
-	}
 
-mm.print_n();
 
-	std:: cout << " mm: size = " << mm.size() << std:: endl;
+//	std::cout <<"mm map:\n";
+//	mm.print_n();
+
+//	std:: cout << " mm: size = " << mm.size() << std:: endl;
 //	mm[12] = 112;
 //	std:: cout << mm[12] << " size = " << mm.size() << std:: endl;
-	::map<int, int>::iterator  it_b = mm.begin();
-	::map<int, int>::iterator  it_e = mm.end();
-	++it_b;
-	++it_b;
-	++it_b;
-	++it_b;
-
-	--it_e;
-	--it_e;
-	--it_e;
-	--it_e;
-	::map<int, int> m_cop(it_b, it_e);
+//	::map<int, int>::iterator  it_b = mm.begin();
+//	::map<int, int>::iterator  it_e = mm.end();
+//	++it_b;
+//	++it_b;
+//	++it_b;
+//	++it_b;
+//
+//	--it_e;
+//	--it_e;
+//	--it_e;
+//	--it_e;
+//	::map<int, int> m_cop(it_b, it_e);
 //	m_cop = mm;
-	std::cout <<"m_cop map:\n";
-	m_cop.print_n();
-	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
-
-	mm.swap(m_cop);
-	mm.print_n();
-	std:: cout << " mm: size = " << mm.size() << std:: endl;
-	mm.print_n();
-	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
+//	std::cout <<"m_cop map:\n";
+//	m_cop.print_n();
+//	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
+//
+//	mm.swap(m_cop);
+//	std::cout <<"mm map:\n";
+//	mm.print_n();
+//	std:: cout << " mm: size = " << mm.size() << std:: endl;
+//	std::cout <<"m_cop map:\n";
+//	m_cop.print_n();
+//	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
+//
+//	std:: cout << "count = " << m_cop.count(58) << std:: endl;
+//
+//	m_cop.clear();
+//	std::cout <<"m_cop map:\n";
+//	m_cop.print_n();
+//	std:: cout << " m_coop: size = " << m_cop.size() << std:: endl;
 
 //
 //

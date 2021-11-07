@@ -152,12 +152,12 @@ public:
 	typedef R									reference;
 	typedef const T&							const_reference;
 	typedef std::bidirectional_iterator_tag		iterator_category;
-	typedef RBNode<T, A>							node_type;
+	typedef RBNode<T, A>						node_type;
 
 private:
-	node_type*			_ptr;
 
 public:
+	node_type*			_ptr;
 	BidirecIterator() {}
 	BidirecIterator(BidirecIterator const& iter) : _ptr(iter._ptr) {}
 	BidirecIterator(const node_type* x) : _ptr(const_cast<node_type*>(x)) {}

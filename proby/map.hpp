@@ -33,7 +33,6 @@ public:
 	typedef Reverse_BiIterator<const_iterator>															const_reverse_iterator;
 	typedef typename allocator_type::template rebind<node_type>::other 									allocator_node;
 	typedef typename allocator_node::pointer															pointer;
-//	typedef typename std::allocator<node_type>::pointer 												pointer;
 	typedef typename std::allocator<node_type>::const_pointer											const_pointer;
 	typedef size_t																						size_type;
 
@@ -49,7 +48,6 @@ public:
 	};
 
 private:
-//	tree			_tree;
 	pointer 		_root;
 	pointer 		_first;
 	pointer 		_last;
@@ -57,6 +55,366 @@ private:
 	allocator_node	alloc;
 	key_compare 	_comp;
 	size_type 		_size;
+
+public:
+
+/**************************** Constructor **********************************/
+
+	explicit map(const Compare& comp = key_compare(), const Allocator& alloc = Allocator()) :
+			 _root(NULL), _comp(comp), alloc(alloc), _size(0) {
+			imaginary_nodes();
+	}
+
+	template <class InputIterator>
+		map (InputIterator first,
+			 typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
+			 const Compare& comp = Compare(),
+			 const Allocator& alloc = Allocator() ) :
+			 _root(NULL), _comp(comp), alloc(alloc), _size(0) {
+				imaginary_nodes();
+				for (; first != last; ++first)
+					insert(*first);
+	}
+
+
+	map (const map& x) :  _root(NULL), _comp(x._comp), alloc(x.alloc), _size(x._size){
+		if (x._root){
+			imaginary_nodes();
+			_root = alloc.allocate(1);
+			alloc.construct(_root, *x._root);
+		}
+	}
+
+/**************************** Destructor **********************************/
+
+	~map() {
+		if (_size) {
+			alloc.destroy(_root);
+			alloc.deallocate(_root, 1);
+		} else{
+			_last->_left = NULL;
+			_last->_right = NULL;
+			_first->_left = NULL;
+			_first->_right = NULL;
+			alloc.destroy(_first);
+			alloc.destroy(_last);
+			alloc.deallocate(_first, 1);
+//			alloc.deallocate(_last, 1);
+		}
+	}
+
+/**************************** operator= **********************************/
+
+	map& operator= (const map& x){
+		if (this == &x)
+			return *this;
+		if (_root){
+			alloc.destroy(_root);
+			alloc.deallocate(_root, 1);
+		}
+		this->imaginary_nodes();
+		_root = alloc.allocate(1);
+		alloc.construct(_root, *x._root);
+		_size = x._size;
+		return *this;
+	}
+
+/**************************** Iterators **********************************/
+
+	iterator begin(){ return iterator(_first->_parent); }
+	const_iterator begin() const{ return const_iterator(_first->_parent); }
+
+	iterator end() {return iterator(_last); }
+	const_iterator end() const { return const_iterator(_last); }
+
+	reverse_iterator rbegin() { return reverse_iterator(end()); }
+	const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+
+	reverse_iterator rend() { return reverse_iterator(begin()); }
+	const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
+/**************************** Capacity **********************************/
+
+	bool empty() const { return !size(); }
+
+	size_type size() const { return _size; }
+
+	size_type max_size() const { return alloc.max_size(); }
+
+/**************************** Element access **********************************/
+
+	mapped_type& operator[] (const key_type& k){
+		return (*((this->insert(make_pair(k, mapped_type()))).first)).second;
+	}
+
+/**************************** insert () **********************************/
+
+
+	pair<iterator, bool> insert (const value_type& val) {
+		if (_size == 0)
+			return ::make_pair(iterator(make_head(val)), true);
+		pointer temp = _root;
+		pointer previous;
+		while (temp->_left){ //пока не дойдем по последнего узла (то есть за ним следует лист)
+			previous = temp;
+			if (key_comp()(val.first, temp->_Val.first))
+				temp = temp->_left;
+			else if (key_comp()(temp->_Val.first, val.first))
+				temp = temp->_right;
+			else
+				return (::make_pair(iterator(temp), false));
+
+		}
+		temp = previous;
+		if (key_comp()(val.first, temp->_Val.first))
+			return (::make_pair(iterator(make_left(val, temp)), true));
+		else if (key_comp()(temp->_Val.first, val.first))
+			return (::make_pair(iterator(make_right(val, temp)), true));
+		else  //найден такой же ключ как и у val
+			return (::make_pair(iterator(temp), false));
+	}
+
+	iterator insert (iterator position, const value_type& val) {
+		return insert(val).first;
+	}
+
+	template <class InputIterator>
+	void insert (InputIterator first,
+				 typename enable_if <std::__is_input_iterator<InputIterator>::value, InputIterator>::type last){
+		for(; first != last; ++first)
+			insert(*first);
+	}
+
+/****************************erase() **********************************/
+
+	void erase( iterator pos ){
+		Key key = pos->first;
+		erase(key);
+	}
+
+	void erase( iterator first, iterator last ){
+		iterator next = first;
+		while (first != last){
+			++next;
+			erase(first);
+			first = next;
+		}
+	}
+
+	size_type erase( const Key& key ){
+		node_type *node = find_node(key);
+		if (!node->_left)
+			return 0;
+		if (node->_left->_left and node->_right->_left){ // узел имеет два потомка - случай 1
+			node_type * temp = search_max(node->_left);
+			swap_node(node, temp);
+		}
+		if (node->_color == BLACK and (node->_left->_left || node->_right->_left)){ //узел черный с одним потомком
+			node_type* temp = (node->_left->_left) ? node->_left : node->_right;
+			swap_node(node, temp);
+			if (node->_color == RED)
+				node = node->delete_node(node);
+		}
+		else if (node->_color == RED and !node->_left->_left and !node->_right->_left) // узел красный без потомков
+			node = node->delete_node(node);
+		else if (node->_color == BLACK and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
+			delete_case1(node);
+			node = node->delete_node(node);
+		}
+		--_size;
+		while (_root and _root->_parent)
+			_root = _root->_parent;
+		return 1;
+	}
+
+/**************************** swap () **********************************/
+
+	void swap (map& x){
+		node_type * temp = this->_root;
+		this->_root = x._root;
+		x._root = temp;
+		swap(this->_size, x._size);
+	}
+
+/**************************** clear () **********************************/
+
+	void clear(){
+		_first->_parent->_left = NULL;
+		_first->_parent = _last;
+		_last->_parent->_right = NULL;
+		_last->_parent = NULL;
+		alloc.destroy(_root);
+		alloc.deallocate(_root, 1);
+		_root = NULL;
+		_size = 0;
+	}
+
+/**************************** key_comp () **********************************/
+
+	key_compare key_comp() const {return key_compare(); }
+
+
+/**************************** find() **********************************/
+	iterator find( const Key& key ){
+		pointer temp = _root;
+		while (temp->_left){
+			if (key_comp()(key, temp->_left->_Val.first))
+				temp = temp->_left;
+			else if (key_comp()(temp->_right->_Val.first, key))
+				temp = temp->_right;
+			else
+				return iterator(temp);
+		}
+		return end();
+	}
+
+	const_iterator find( const Key& key ) const{
+		pointer temp = _root;
+		while (temp->_left){
+			if (key_comp()(key, temp->_left->_Val.first))
+				temp = temp->_left;
+			else if (key_comp()(temp->_right->_Val.first, key))
+				temp = temp->_right;
+			else
+				return iterator(temp);
+		}
+		return end();
+	}
+
+/**************************** count () **********************************/
+
+	size_type count (const key_type& k) const{
+		node_type *temp = this->_root;
+		if (temp){
+			while (k != temp->_Val.first){
+				if (key_comp()(k, temp->_Val.first))
+					temp = temp->_left;
+				else if (key_comp()(temp->_Val.first, k))
+					temp = temp->_right;
+				if (temp->_left == NULL)
+					return 0;
+			}
+			return 1;
+		}
+		return 0;
+	}
+
+/**************************** lower_bound () **********************************/
+
+	iterator lower_bound (const key_type& k){
+		if (!_root)
+			return end();
+		node_type *temp = _root;
+		while (temp != _first and temp != _last){
+			if (key_comp()(k, temp->_Val.first)){
+				if (temp->_left->_parent)
+					temp = temp->_left;
+				else
+					return iterator(temp);
+			}else if (key_comp()(temp->_Val.first, k)){
+				if (temp->_right->_parent)
+					temp = temp->_right;
+				else
+					return ++iterator(temp);
+			} else
+				return iterator (temp);
+		}
+		return (temp == _first) ? iterator(temp->_parent) : iterator(temp);
+	}
+
+	const_iterator lower_bound (const key_type& k) const{
+		if (!_root)
+			return end();
+		node_type *temp = _root;
+		while (temp != _first and temp != _last){
+			if (key_comp()(k, temp->_Val.first)){
+				if (temp->_left->_parent)
+					temp = temp->_left;
+				else
+					return const_iterator(temp);
+			}else if (key_comp()(temp->_Val.first, k)){
+				if (temp->_right->_parent)
+					temp = temp->_right;
+				else
+					return ++const_iterator(temp);
+			} else
+				return const_iterator (temp);
+		}
+		return (temp == _first) ? const_iterator(temp->_parent) : const_iterator(temp);
+	}
+
+/**************************** upper_bound () **********************************/
+
+	iterator upper_bound (const key_type& k){
+		if (!_root)
+			return end();
+		node_type *temp = _root;
+		while (temp != _first and temp != _last){
+			if (key_comp()(k, temp->_Val.first)){
+				if (temp->_left->_parent)
+					temp = temp->_left;
+				else
+					return iterator(temp);
+			}else if (key_comp()(temp->_Val.first, k)){
+				if (temp->_right and temp->_right->_parent)
+					temp = temp->_right;
+				else
+					return ++iterator(temp);
+			} else
+				return ++iterator(temp);
+		}
+		return (temp == _first) ? iterator(temp->_parent) : iterator(temp);
+	}
+
+	const_iterator upper_bound (const key_type& k) const{
+		if (!_root)
+			return end();
+		node_type *temp = _root;
+		while (temp != _first and temp != _last){
+			if (key_comp()(k, temp->_Val.first)){
+				if (temp->_left->_parent)
+					temp = temp->_left;
+				else
+					return const_iterator(temp);
+			}else if (key_comp()(temp->_Val.first, k)){
+				if (temp->_right and temp->_right->_parent)
+					temp = temp->_right;
+				else
+					return ++const_iterator(temp);
+			} else
+				return ++const_iterator(temp);
+		}
+		return (temp == _first) ? const_iterator(temp->_parent) : const_iterator(temp);
+	}
+
+/**************************** equal_range () **********************************/
+
+	pair<iterator,iterator> equal_range (const key_type& k){
+		return ::make_pair(lower_bound(k), upper_bound(k));
+	}
+
+	pair<const_iterator,const_iterator> equal_range (const key_type& k) const{
+		return ::make_pair(lower_bound(k), upper_bound(k));
+	}
+
+
+/**************************** get_allocator () **********************************/
+
+	allocator_type get_allocator() const {return alloc; }
+
+
+/* ******************* Вспомогательные функции ****************** */
+private:
+
+	void print_n() const{
+		if (!_root)
+			return;
+		int h = _root->Height(_root);
+		for (int i = 0; i < h; ++i) {
+			this->_root->print_n(_root, i, 0);
+			std::cout <<std::endl;
+		}
+	}
 
 	void imaginary_nodes() {
 		_first = alloc.allocate(1);
@@ -118,17 +476,17 @@ private:
 	}
 
 	template<class U>
-	void swap(U **left, U **right){
+			void swap(U **left, U **right){
 		U* temp = *left;
 		*left = *right;
 		*right = temp;
 	}
 	template<class U>
-	void swap(U &left, U &right){
-	U temp = left;
-	left = right;
-	right = temp;
-}
+			void swap(U &left, U &right){
+		U temp = left;
+		left = right;
+		right = temp;
+	}
 
 	node_type* search_min(node_type* node){
 		node_type* temp = node;
@@ -143,101 +501,6 @@ private:
 			temp = temp->_right;
 		return temp;
 	}
-
-public:
-
-/**************************** Constructor **********************************/
-
-	explicit map(const Compare& comp = key_compare(), const Allocator& alloc = Allocator()) :
-			 _root(NULL), _comp(comp), alloc(alloc), _size(0) {
-			imaginary_nodes();
-	}
-
-	template <class InputIterator>
-		map (InputIterator first,
-			 typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
-			 const Compare& comp = Compare(),
-			 const Allocator& alloc = Allocator() ) :
-			 _root(NULL), _comp(comp), alloc(alloc), _size(0) {
-				imaginary_nodes();
-				for (; first != last; ++first)
-					insert(*first);
-	}
-
-
-	map (const map& x) :  _root(NULL), _comp(x._comp), alloc(x.alloc), _size(x._size){
-		if (x._root){
-			imaginary_nodes();
-			_root = alloc.allocate(1);
-			alloc.construct(_root, *x._root);
-		}
-	}
-
-/**************************** Destructor **********************************/
-
-	~map() {
-		if (_size) {
-			alloc.destroy(_root);
-			alloc.deallocate(_root, 1);
-		} else{
-			_last->_left = NULL;
-			_last->_right = NULL;
-			_first->_left = NULL;
-			_first->_right = NULL;
-			alloc.destroy(_first);
-			alloc.destroy(_last);
-			alloc.deallocate(_first, 1);
-//			alloc.deallocate(_last, 1);
-		}
-
-	}
-
-	/**************************** operator= **********************************/
-
-	map& operator= (const map& x){
-		if (this == &x)
-			return *this;
-		if (_root){
-			alloc.destroy(_root);
-			alloc.deallocate(_root, 1);
-		}
-		this->imaginary_nodes();
-		_root = alloc.allocate(1);
-		alloc.construct(_root, *x._root);
-		_size = x._size;
-		return *this;
-	}
-
-/**************************** Iterators **********************************/
-
-	iterator begin(){ return iterator(_first->_parent); }
-	const_iterator begin() const{ return const_iterator(_first->_parent); }
-
-	iterator end() {return iterator(_last); }
-	const_iterator end() const { return const_iterator(_last); }
-
-	reverse_iterator rbegin() { return reverse_iterator(end()); }
-	const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
-
-	reverse_iterator rend() { return reverse_iterator(begin()); }
-	const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
-
-/**************************** Capacity **********************************/
-
-	bool empty() const { return !size(); }
-
-	size_type size() const { return _size; }
-
-	size_type max_size() const { return alloc.max_size(); }
-
-/**************************** Element access **********************************/
-
-	mapped_type& operator[] (const key_type& k){
-		return (*((this->insert(make_pair(k, mapped_type()))).first)).second;
-	}
-
-/**************************** Modifiers **********************************/
-
 
 	pointer make_head(const value_type& val){
 		_root = alloc.allocate(1);
@@ -290,72 +553,6 @@ public:
 		return ptr;
 	}
 
-	pair<iterator, bool> insert (const value_type& val) {
-		if (_size == 0)
-			return ::make_pair(iterator(make_head(val)), true);
-		pointer temp = _root;
-		pointer previous;
-		while (temp->_left){ //пока не дойдем по последнего узла (то есть за ним следует лист)
-			previous = temp;
-			if (key_comp()(val.first, temp->_Val.first))
-				temp = temp->_left;
-			else if (key_comp()(temp->_Val.first, val.first))
-				temp = temp->_right;
-			else
-				return (::make_pair(iterator(temp), false));
-
-		}
-		temp = previous;
-		if (key_comp()(val.first, temp->_Val.first))
-			return (::make_pair(iterator(make_left(val, temp)), true));
-		else if (key_comp()(temp->_Val.first, val.first))
-			return (::make_pair(iterator(make_right(val, temp)), true));
-		else  //найден такой же ключ как и у val
-			return (::make_pair(iterator(temp), false));
-	}
-
-
-	iterator insert (iterator position, const value_type& val) {
-		return insert(val).first;
-	}
-
-
-	template <class InputIterator>
-	void insert (InputIterator first,
-				 typename enable_if <std::__is_input_iterator<InputIterator>::value, InputIterator>::type last){
-		for(; first != last; ++first)
-			insert(*first);
-	}
-
-/**************************** find() **********************************/
-	iterator find( const Key& key ){
-		pointer temp = _root;
-		while (temp->_left){
-			if (key_comp()(key, temp->_left->_Val.first))
-				temp = temp->_left;
-			else if (key_comp()(temp->_right->_Val.first, key))
-				temp = temp->_right;
-			else
-				return iterator(temp);
-		}
-		return end();
-	}
-
-	const_iterator find( const Key& key ) const{
-		pointer temp = _root;
-		while (temp->_left){
-			if (key_comp()(key, temp->_left->_Val.first))
-				temp = temp->_left;
-			else if (key_comp()(temp->_right->_Val.first, key))
-				temp = temp->_right;
-			else
-				return iterator(temp);
-		}
-		return end();
-	}
-
-/****************************erase() **********************************/
-
 	void delete_case1(node_type* node){
 		if (node->_parent)
 			delete_case2(node);
@@ -376,7 +573,7 @@ public:
 	void delete_case3(node_type* node){
 		node_type* br = node->brother();
 		if(node->_parent->_color == BLACK and br->_color == BLACK and
-			br->_left->_color == BLACK and br->_right->_color == BLACK){
+		br->_left->_color == BLACK and br->_right->_color == BLACK){
 			br->_color = RED;
 			delete_case1(node->_parent);
 		}
@@ -387,8 +584,8 @@ public:
 	void delete_case4(node_type* node){
 		node_type *br = node->brother();
 		if (br->_color == BLACK and br->_left->_color == BLACK and
-			br->_right->_color == BLACK and
-			node->_parent->_color == RED){
+		br->_right->_color == BLACK and
+		node->_parent->_color == RED){
 			swap((br->_color), (node->_parent->_color));
 		}
 		else
@@ -405,11 +602,11 @@ public:
 				br->_left->_color = BLACK;
 				RightTurn(br);
 			}else if ((node == node->_parent->_right) and
-				br->_left->_color == BLACK and
-				br->_right->_color == RED) {
-					br->_color = RED;
-					br->_right->_color = BLACK;
-					LeftTurn(br);
+			br->_left->_color == BLACK and
+			br->_right->_color == RED) {
+				br->_color = RED;
+				br->_right->_color = BLACK;
+				LeftTurn(br);
 			}
 		}
 		delete_case6(node);
@@ -429,78 +626,7 @@ public:
 		}
 	}
 
-
-	void erase( iterator pos ){
-		Key key = pos->first;
-		erase(key);
-	}
-
-	void erase( iterator first, iterator last ){
-		iterator next = first;
-		while (first != last){
-			++next;
-			erase(first);
-			first = next;
-		}
-	}
-
-	size_type erase( const Key& key ){
-		node_type *node = find_node(key);
-		if (!node->_left)
-			return 0;
-		if (node->_left->_left and node->_right->_left){ // узел имеет два потомка - случай 1
-			node_type * temp = search_max(node->_left);
-			swap_node(node, temp);
-		}
-		if (node->_color == BLACK and (node->_left->_left || node->_right->_left)){ //узел черный с одним потомком
-			node_type* temp = (node->_left->_left) ? node->_left : node->_right;
-			swap_node(node, temp);
-			if (node->_color == RED)
-				node = node->delete_node(node);
-		}
-		else if (node->_color == RED and !node->_left->_left and !node->_right->_left) // узел красный без потомков
-			node = node->delete_node(node);
-		else if (node->_color == BLACK and !node->_left->_left and !node->_right->_left){ // узел черный без потомков
-			delete_case1(node);
-			node = node->delete_node(node);
-		}
-		--_size;
-		while (_root and _root->_parent)
-			_root = _root->_parent;
-		return 1;
-	}
-
-	/* Удаление
-	 1. Если удаляемый элемент имеет два потомка, то меняем его значение со значением ближайшим большим (или меньшим).
-		Далее решаем задачу удаления элемента с 1 или 0 потомками;
-	 2. Удаляемый элемент ЧЕРНЫЙ С ОДНИМ ПОТОМКОМ - (в этом случае этот потомок обязательно красный) - переносим его
-		 значение в удаляемый узел и потом его (потомка) удаляем;
-	 3. Удаляемый элемент КРАСНЫЙ БЕЗ ПОТОМКОВ - просто удаляем этот узел;
-	 4. Удаляемый элемент ЧЕРНЫЙ БЕЗ ПОТОМКОВ - удаляем его и вызываем балансировку для родительского узла - 6 случаев:
-	 4.1. N - новый корень;
-	 4.2. S - красный;
-	 4.3. P, S и дети S (1 и 2) - черные;
-	 4.4. S и его дети — чёрные, но P — красный;
-	 4.5. S черный, его левый потомок - красный, а правый потомок - черный;
-	 4.6. S — чёрный, правый потомок S — красный. */
-
-
-/**************************** swap () **********************************/
-
-	void swap (map& x){
-		node_type * temp = this->_root;
-		this->_root = x._root;
-		x._root = temp;
-		swap(this->_size, x._size);
-	}
-
-/**************************** Observers **********************************/
-
-	key_compare key_comp() const {return key_compare(); }
-
-
-
-	/* **************** балансировка ********************** */
+/***************** балансировка ***********************/
 	void balancing(pointer ptr){
 		if (!ptr->_parent){
 			ptr->_color = BLACK;
@@ -512,7 +638,7 @@ public:
 		pointer G = ptr->grandfather();
 		pointer U = ptr->uncle();
 		if (P->_color == RED and U->_color == RED){ //случай 3
-			std::cout << "swap color\n";
+			//			std::cout << "swap color\n";
 			P->_color = BLACK;
 			U->_color = BLACK;
 			G->_color = RED;
@@ -541,7 +667,7 @@ public:
 	}
 
 	void LeftTurn(pointer root){
-		std::cout << "LeftTurn\n";
+		//		std::cout << "LeftTurn\n";
 		node_type* RightSubTree = root->_right;
 		node_type* RightSubTreeLeft = RightSubTree->_left;
 		if(root->_parent) {
@@ -559,7 +685,7 @@ public:
 	}
 
 	void RightTurn(pointer root){
-		std::cout << "RightTurn\n";
+		//		std::cout << "RightTurn\n";
 		node_type* LeftSubTree = root->_left;
 		node_type* LeftSubTreeRight = LeftSubTree->_right;
 		if (root->_parent){
@@ -576,19 +702,6 @@ public:
 			LeftSubTreeRight->_parent = root;
 	}
 
-
-
-	/* ******************* Вспомогательные функции ****************** */
-	void print_n() const{
-		if (!_root)
-			return;
-		int h = _root->Height(_root);
-//		std::cout << "h = " << h << std::endl;
-		for (int i = 0; i < h; ++i) {
-			this->_root->print_n(_root, i, 0);
-			std::cout <<std::endl;
-		}
-	}
 	/* ******************* Вспомогательные функции ****************** */
 
 };
