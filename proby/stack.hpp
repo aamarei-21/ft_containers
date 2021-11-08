@@ -8,7 +8,7 @@
 
 namespace ft
 {
-template <class T, class Container = My_class<T> >
+template <class T, class Container = vector<T, std::allocator<T> >  >
 class stack
 {
 public:

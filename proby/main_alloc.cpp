@@ -1,11 +1,12 @@
-#include "Vector.hpp"
+#include "vector.hpp"
+#include <string>
 #include <vector>
 #include <set>
 #include <list>
 #include <iostream>
 #include "Iterator.hpp"
 #include "pair.hpp"
-#include "map.hpp"
+//#include "map.hpp"
 #include <map>
 #include <string>
 #include <fstream>
@@ -37,59 +38,120 @@ std::ostream& operator<<(std::ostream& out, Proba const arg)
 	return out;
 }
 
-class A {
-public:
-   int i;
-   int *a;
+//class A {
+//public:
+//   int i;
+//   int *a;
+//
+//   void print() const {
+//      for (int c = 0; c < 5; c++)
+//         std::cout << a[c] << std::endl;
+//   }
+//   A() : i(1), a(new int[5]()) {
+//      for (int c = 0; c < 5; c++)
+//         a[c] = c;
+//      std::cout << "const" << std::endl; };
+//   A(A const &r) : i(r.i), a(new int[5]()) {
+//      for (int t = 0; t < 5; t++)
+//         a[t] = r.a[t];
+//      std::cout << "copy const" << std::endl; };
+//   ~A() { std::cout << "des" << std::endl; delete [] a; }
+//};
 
-   void print() const {
-      for (int c = 0; c < 5; c++)
-         std::cout << a[c] << std::endl;
-   }
-   A() : i(1), a(new int[5]()) {
-      for (int c = 0; c < 5; c++)
-         a[c] = c;
-      std::cout << "const" << std::endl; };
-   A(A const &r) : i(r.i), a(new int[5]()) {
-      for (int t = 0; t < 5; t++)
-         a[t] = r.a[t];
-      std::cout << "copy const" << std::endl; };
-   ~A() { std::cout << "des" << std::endl; delete [] a; }
+#include <sys/time.h>
+
+time_t timer() {
+	struct timeval start = {};
+	gettimeofday(&start, nullptr);
+	time_t msecs_time = (start.tv_sec * 1000) + (start.tv_usec / 1000);
+	return msecs_time;
+}
+
+
+
+
+
+class B {
+public:
+	char *l;
+	int i;
+	B():l(nullptr), i(1) {};
+	B(const int &ex) {
+		this->i = ex;
+		this->l = new char('a');
+	};
+	virtual ~B() {
+		delete this->l;
+		this->l = nullptr;
+	};
 };
+
+class A : public B {
+public:
+	A():B(){};
+	A(const B* ex){
+		this->l = new char(*(ex->l));
+		this->i = ex->i;
+		if (ex->i == -1) throw "n";
+	}
+	~A() {
+		delete this->l;
+		this->l = nullptr;
+	};
+};
+
+time_t g_start1;
+time_t g_end1;
+time_t g_start2;
+time_t g_end2;
+
 
 int main()
 {
+//	namespace ft = std;
+std::vector<int> v;
+ft::vector<int> vector;
+for (int i = 0; i < 99000000; ++i)
+	vector.push_back(i);
+g_start2 = timer();
+v.push_back(*(vector.erase(vector.begin() + 80000, vector.end() - 15000000)));
+g_end2 = timer();
+v.push_back(*(vector.begin() + 82000));
+v.push_back(vector.size());
+v.push_back(vector.capacity());
 
-	std::string line;
-	char c;
-	int key, pos = 0;
-	std:: ifstream kin("./key.txt");
+	std::cout << std::difftime(g_end2, g_start2) << std::endl;
 
-	::map<int, int> mm;
-//	mm.insert(::pair<int,int>(0, 10));
-	mm.insert(::pair<int,int>(10, 10));
-	mm.insert(::pair<int,int>(20, 10));
-	mm.insert(::pair<int,int>(30, 10));
-	mm.insert(::pair<int,int>(40, 10));
-	mm.insert(::pair<int,int>(50, 10));
-	mm.insert(::pair<int,int>(60, 10));
-	mm.insert(::pair<int,int>(70, 10));
-	mm.insert(::pair<int,int>(80, 10));
-	mm.insert(::pair<int,int>(90, 10));
-	mm.insert(::pair<int,int>(100, 10));
-
-	::map<int, int>::iterator it;
-	::pair<map<int, int>::iterator, map<int, int>::iterator> ret;
-	it = mm.upper_bound(20);
-	std::cout << "mm.upper_bound = " << it->first << std::endl;
-
-	ret = mm.equal_range(10);
-	std::cout << "lower bound points to: ";
-	std::cout << ret.first->first << " => " << ret.first->second << '\n';
-
-	std::cout << "upper bound points to: ";
-	std::cout << ret.second->first << " => " << ret.second->second << '\n';
-
+//	std::string line;
+//	char c;
+//	int key, pos = 0;
+//	std:: ifstream kin("./key.txt");
+//
+//	::map<int, int> mm;
+////	mm.insert(::pair<int,int>(0, 10));
+//	mm.insert(::pair<int,int>(10, 10));
+//	mm.insert(::pair<int,int>(20, 10));
+//	mm.insert(::pair<int,int>(30, 10));
+//	mm.insert(::pair<int,int>(40, 10));
+//	mm.insert(::pair<int,int>(50, 10));
+//	mm.insert(::pair<int,int>(60, 10));
+//	mm.insert(::pair<int,int>(70, 10));
+//	mm.insert(::pair<int,int>(80, 10));
+//	mm.insert(::pair<int,int>(90, 10));
+//	mm.insert(::pair<int,int>(100, 10));
+//
+//	::map<int, int>::iterator it;
+//	::pair<map<int, int>::iterator, map<int, int>::iterator> ret;
+//	it = mm.upper_bound(20);
+//	std::cout << "mm.upper_bound = " << it->first << std::endl;
+//
+//	ret = mm.equal_range(10);
+//	std::cout << "lower bound points to: ";
+//	std::cout << ret.first->first << " => " << ret.first->second << '\n';
+//
+//	std::cout << "upper bound points to: ";
+//	std::cout << ret.second->first << " => " << ret.second->second << '\n';
+//
 
 //	mm.erase(20);
 //	mm.erase(10);
@@ -164,7 +226,7 @@ int main()
 //	mm.print_n();
 
 
-//	::My_class<pair<int, int> > my_vec;
+//	::vector<pair<int, int> > my_vec;
 //	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
 //	my_vec.push_back(pair<int, int>(10,10));
 //	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
@@ -175,7 +237,7 @@ int main()
 //	my_vec.push_back(pair<int, int>(25,25));
 //	std::cout <<my_vec.size() << "   " << my_vec.capacity() << std::endl;
 
-//	::My_class<pair<int, int> > myClass;
+//	::vector<pair<int, int> > myClass;
 //	myClass.insert(::pair<int, int>(10, 20));
 
 //	pair<int, float> P(10, 10.5f);
