@@ -3,6 +3,37 @@
 #define __ITTRAITS_HPP__
 
 namespace ft {
+
+	template <class T, T v>
+	struct integral_constant {
+		static T value = v;
+		typedef T value_type;
+		typedef integral_constant<T,v> type;
+	};
+
+	typedef integral_constant<bool,true> true_type;
+	typedef integral_constant<bool,false> false_type;
+
+	template<typename> struct is_integral_base: std::false_type {};
+	template<> struct is_integral_base<bool>: std::true_type {};
+	template<> struct is_integral_base<char>: std::true_type {};
+	template<> struct is_integral_base<char16_t>: std::true_type {};
+	template<> struct is_integral_base<char32_t>: std::true_type {};
+	template<> struct is_integral_base<wchar_t>: std::true_type {};
+	template<> struct is_integral_base<signed char>: std::true_type {};
+	template<> struct is_integral_base<short int>: std::true_type {};
+	template<> struct is_integral_base<int>: std::true_type {};
+	template<> struct is_integral_base<long int>: std::true_type {};
+	template<> struct is_integral_base<long long int>: std::true_type {};
+	template<> struct is_integral_base<unsigned char>: std::true_type {};
+	template<> struct is_integral_base<unsigned short int>: std::true_type {};
+	template<> struct is_integral_base<unsigned int>: std::true_type {};
+	template<> struct is_integral_base<unsigned long int>: std::true_type {};
+	template<> struct is_integral_base<unsigned long long int>: std::true_type {};
+
+	template<typename T> struct is_integral: is_integral_base<T> {};
+
+
 	template<class _Iter>
 	struct iterator_traits {
 		typedef typename _Iter::difference_type difference_type;

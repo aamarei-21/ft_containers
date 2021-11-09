@@ -1,21 +1,21 @@
 #include "vector.hpp"
 
-namespace ft {
-	template<class InputIterator>
-	size_t ft_distance(InputIterator const &first, InputIterator const &second) {
-		size_t temp(0);
-		for (InputIterator it = first; it != second; ++it)
-			++temp;
-		return temp;
-	}
-
-	template<class T>
-	void ft_swap(T &larg, T &rarg) {
-		T temp_arg;
-		temp_arg = larg;
-		larg = rarg;
-		rarg = temp_arg;
-	}
+//namespace ft {
+//	template<class InputIterator>
+//	size_t ft_distance(InputIterator const &first, InputIterator const &second) {
+//		size_t temp(0);
+//		for (InputIterator it = first; it != second; ++it)
+//			++temp;
+//		return temp;
+//	}
+//
+//	template<class T>
+//	void ft_swap(T &larg, T &rarg) {
+//		T temp_arg;
+//		temp_arg = larg;
+//		larg = rarg;
+//		rarg = temp_arg;
+//	}
 
 /*************  Constructot *****************/
 
@@ -426,4 +426,4 @@ namespace ft {
 //	template<class T, class Alloc>
 //	void swap(vector <T, Alloc> &lhs, vector <T, Alloc> &rhs) { lhs.swap(rhs); }
 
-} //namespace ft
+//} //namespace ft

@@ -26,8 +26,8 @@ namespace ft {
 		Randomiterator() {}
 
 		Randomiterator(iterator_type x) :  ptr(x) {}
-
-		Randomiterator(const Randomiterator &iter) : ptr(iter.ptr) {}
+		template<class _T>
+		Randomiterator(const Randomiterator<_T> &iter) : ptr(&(*iter)) {}
 
 		pointer get_ptr()
 		{
@@ -78,6 +78,8 @@ namespace ft {
 		}
 
 		reference operator*() { return *ptr; }
+
+		const reference operator*() const { return *ptr; }
 
 		pointer operator->() { return ptr; }
 
@@ -151,7 +153,8 @@ namespace ft {
 
 		explicit Reverse_Iterator(const Iter &x) : _itr(x) {}
 
-		Reverse_Iterator(const Reverse_Iterator &other) : _itr(other._itr) {}
+		template<class _Iter>
+		Reverse_Iterator(const Reverse_Iterator<_Iter> &other) : _itr(other.base()) {}
 
 		Iter base() const { return _itr; }
 

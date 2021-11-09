@@ -8,7 +8,7 @@
 
 namespace ft {
 	template<class InputIterator>
-			size_t ft_distance(InputIterator const &first, InputIterator const &second) {
+			size_t ft_distance(InputIterator first, InputIterator second) {
 				size_t temp(0);
 				for (InputIterator it = first; it != second; ++it)
 					++temp;
@@ -63,7 +63,7 @@ namespace ft {
 
 	template<class InputIterator>
 	vector(InputIterator first,
-		   typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
+		   typename enable_if<not is_integral<InputIterator>::value, InputIterator>::type last,
 		   const allocator_type &al = allocator_type()) : alloc(al) {
 		_size = 0;
 		while (first + _size != last)
@@ -102,7 +102,7 @@ namespace ft {
 /*************  begin, end  *****************/
 	iterator begin() { return ptr; }
 
-	iterator end() { return (ptr + _size); }
+	iterator end() { return ptr + _size; }
 
 	const_iterator begin() const { return ptr; }
 
@@ -228,28 +228,28 @@ namespace ft {
 		_size = count;
 	}
 
-		template<class InputIterator>
-		void assign(InputIterator first,
-					typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last) {
-		typename vector<T, Alloc>::size_type size;
+template<class InputIterator>
+typename enable_if<not is_integral<InputIterator>::value>::type
+assign(InputIterator first, InputIterator last) {
+	typename vector<T, Alloc>::size_type size;
 
-		size = ft_distance(first, last);
-		if (size <= _capacity) {
-			for (typename vector<T, Alloc>::size_type temp = 0; temp < size; ++temp) {
-				alloc.destroy(ptr + temp);
-				alloc.construct(ptr + temp, *(first + temp));
-			}
-			for (typename vector<T, Alloc>::size_type i = size; i < _size; ++i)
-				alloc.destroy(ptr + i);
-		} else {
-			reserve(size);
-			for (typename vector<T, Alloc>::size_type i = 0; i < size; ++i)
-				alloc.construct(ptr + i, *(first + i));
-			for (typename vector<T, Alloc>::size_type i = size; i < _size; ++i)
-				alloc.destroy(ptr + i);
+	size = ft_distance(first, last);
+	if (size <= _capacity) {
+		for (typename vector<T, Alloc>::size_type temp = 0; temp < size; ++temp) {
+			alloc.destroy(ptr + temp);
+			alloc.construct(ptr + temp, *(first + temp));
 		}
-		_size = size;
+		for (typename vector<T, Alloc>::size_type i = size; i < _size; ++i)
+			alloc.destroy(ptr + i);
+	} else {
+		reserve(size);
+		for (typename vector<T, Alloc>::size_type i = 0; i < size; ++i)
+			alloc.construct(ptr + i, *(first + i));
+		for (typename vector<T, Alloc>::size_type i = size; i < _size; ++i)
+			alloc.destroy(ptr + i);
 	}
+	_size = size;
+}
 
 /*************  push_back()  *****************/
 	void push_back(T const &value) {
@@ -277,14 +277,39 @@ namespace ft {
 
 /*************  insert()  *****************/
 	iterator insert(iterator pos, const T &value) {
+		if (_capacity == 0){
+			size_type temp_size;
+			temp_size = (ptr < pos.get_ptr()) ? ft_distance(ptr, pos.get_ptr()) : -ft_distance(pos.get_ptr(), ptr);
+			alloc.deallocate(ptr, _capacity);
+			ptr = alloc.allocate(1);
+			alloc.construct(ptr + temp_size, value);
+			_size = 1;
+			_capacity = 1;
+			return iterator(ptr);
+		}
 		if (_size == _capacity) {
 			size_type temp_size;
 			temp_size = (ptr < pos.get_ptr()) ? ft_distance(ptr, pos.get_ptr()) : -ft_distance(pos.get_ptr(), ptr);
-			reserve(_capacity * 2);
-			pos = iterator(ptr) + temp_size;
+			pointer temp_ptr = alloc.allocate(_capacity * 2);
+			iterator it = begin();
+			size_type i = 0;
+			for (; it != pos and it != end(); ++it, ++i)
+				alloc.construct(temp_ptr + i, *it);
+			alloc.construct(temp_ptr + temp_size, value);
+			if (it == pos){
+				++i;
+				for(; it != end(); ++it, ++i)
+					alloc.construct(temp_ptr + i, *it);
+			}
+			temp_size = _size;
+			clear();
+			alloc.deallocate(ptr, _capacity);
+			_size = ++temp_size;
+			_capacity *= 2;
+			ptr = temp_ptr;
 		}
-		if (pos >= end()) {
-			alloc.construct(pos.get_ptr(), value);
+		else if (pos >= end()) {
+			alloc.construct(&(*pos), value);
 			_size = ft_distance(begin(), pos + 1);
 		} else {
 			for (iterator it = end(); it != pos; --it)
@@ -297,36 +322,93 @@ namespace ft {
 
 	void insert(iterator pos, size_type count, const T &value) {
 		if (_size + count > _capacity) {
-			typename vector<T, Alloc>::size_type temp_size;
-			temp_size = (ptr < pos.ptr) ? ft_distance(ptr, pos.ptr) : -ft_distance(pos.ptr, ptr);
-			reserve(_size + count);
-			pos.ptr = ptr + temp_size;
-		}
-		if (pos >= end()) {
-			for (typename vector<T, Alloc>::size_type i = 0; i < count; ++i)
-				alloc.construct((pos + i).ptr, value);
+			size_type temp_size;
+			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
+			size_type temp_capacity = (_size + count > 2 * _capacity) ? _size + count : 2 * _capacity;
+			pointer temp_ptr = alloc.allocate(temp_capacity);
+			iterator it = begin();
+			size_type i = 0;
+			for(; it != pos and it != end(); ++it, ++i)
+				alloc.construct(temp_ptr + i, *it);
+			for (size_type j = 0; j < count; ++j)
+				alloc.construct(temp_ptr + temp_size + j, value);
+			if (it == pos){
+				for(; it != end(); ++it, ++i)
+					alloc.construct(temp_ptr + count + i, *it);
+			} else {
+				for(; it != pos; ++it, ++i)
+					alloc.construct(temp_ptr + i, *it);
+			}
+			temp_size = (_size < temp_size) ? temp_size : _size;
+			clear();
+			alloc.deallocate(ptr, _capacity);
+			ptr = temp_ptr;
+			_size = temp_size + count;
+			_capacity = temp_capacity;
+		} else if (pos >= end()) {
+			for (size_type i = 0; i < count; ++i)
+				alloc.construct(&(*(pos + i)), value);
 			_size = ft_distance(begin(), pos + count);
 		} else {
 			for (iterator it = end() + count; it != pos; --it)
-				alloc.construct(it.ptr, *(it - count).ptr);
-			for (typename vector<T, Alloc>::size_type i = 0; i < count; ++i)
-				alloc.construct((pos + i).ptr, value);
+				alloc.construct(&(*it), *(it - count));
+			for (size_type i = 0; i < count; ++i)
+				alloc.construct(&(*(pos + i)), value);
 			_size += count;
 		}
 	}
 
-	template<class InputIt>
-	void insert(iterator pos, InputIt first,
-				typename enable_if<std::__is_input_iterator<InputIt>::value, InputIt>::type last) {
-		typename vector<T, Alloc>::size_type count;
-		count = ft_distance(first, last);
+	template<class InputIterator>
+//	typename enable_if<not is_integral<InputIterator>::value >::type
+	void insert(iterator pos, InputIterator first, InputIterator second) {
+		size_type count;
+		count = ft_distance(first, second);
+		if (_capacity == 0){
+			size_type temp_size = ft_distance(ptr, &(*pos));
+//			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
+			alloc.deallocate(ptr, _capacity);
+			ptr = alloc.allocate(count);
+			--second;
+			for (; second != first; ++_size){
+				alloc.construct(ptr + temp_size + count - 1, *(second--));
+				--count;
+			}
+			alloc.construct(ptr + temp_size + count - 1, *second);
+			_capacity = count;
+			return;
+		}
+
+//	std::cout <<"count = " << count << std::endl;
 		if (_size + count > _capacity) {
 			size_type temp_size;
-			temp_size = (ptr < pos.get_ptr()) ? ft_distance(ptr, pos.get_ptr()) : -ft_distance(pos.get_ptr(), ptr);
-			(_size + count > 2 * _capacity) ? reserve(_size + count) : reserve(2 * _capacity);
-			pos = iterator (ptr) + temp_size;
+			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
+//	std::cout <<"temp_size = " << temp_size << std::endl;
+			size_type temp_capacity = (_size + count > 2 * _capacity) ? _size + count : 2 * _capacity;
+//	std::cout <<"temp_capacity  = " << temp_capacity << std::endl;
+			pointer temp_ptr = alloc.allocate(temp_capacity);
+			iterator it = begin();
+//	std::cout <<"*it (insert) = " << *it << std::endl;
+//	std::cout <<"*pos (insert) = " << *pos << std::endl;
+			size_type i = 0;
+			for(; it != pos and it != end(); ++it, ++i)
+				alloc.construct(temp_ptr + i, *it);
+			for (size_type j = 0; j < count; j++)
+				alloc.construct(temp_ptr + temp_size + j, *(first + j));
+			if (it == pos){
+				for (; it != end(); ++it, ++i)
+					alloc.construct(temp_ptr + count + i, *it);
+			} else{
+				for(; it != pos; ++it, ++i)
+					alloc.construct(temp_ptr + i, *it);
+			}
+			temp_size = (_size < temp_size) ? temp_size : _size;
+			clear();
+			alloc.deallocate(ptr, _capacity);
+			ptr = temp_ptr;
+			_size = temp_size + count;
+			_capacity = temp_capacity;
 		}
-		if (pos >= end()) {
+		else if (pos >= end()) {
 			for (size_type i = 0; i < count; ++i)
 				alloc.construct((pos + i).get_ptr(), *(first + i));
 			_size = ft_distance(begin(), pos + count);
@@ -341,25 +423,30 @@ namespace ft {
 
 /*************  erase()  *****************/
 	iterator erase(iterator pos) {
-		for (iterator it = pos; it != end(); ++it)
-			*it = *(it + 1);
-		alloc.destroy(&(*end()));
+		size_type n = pos - begin();
+		for (size_type i = n; i < _size - 1; ++i)
+			ptr[i] = ptr[i + 1];
+		alloc.destroy(&ptr[_size - 1]);
 		_size = (pos >= end()) ? _size : --_size;
-		return pos;
+		return  pos;
 	}
 
 	iterator erase(iterator first, iterator last) {
-		size_type count;
-		count = ft_distance(first, last);
+//		size_type count = last - first;
+//		size_type n_ = first - begin();
+		size_type count = ft_distance(first, last);
 		if (count < 0)
 			return last;
-		for (size_type i = 0; i < count; ++i)
-			alloc.construct((first + i).get_ptr(), *(last + i));
-		for (iterator it = last; it != end(); ++it){
-			alloc.construct(it.get_ptr(), *(last + count));
-			++count;
+		size_type i = 0;
+		for (; i + count < _size; ++i){
+			ptr[i] = ptr[i + count];
 		}
-		_size -= ft_distance(first, last);
+//			alloc.construct((first + i).get_ptr(), *(last + i));
+//		for (; i < _size; ++i){
+//			alloc.construct(it.get_ptr(), *(last + count));
+//			++count;
+//		}
+		_size -= count;
 		return first;
 	}
 
@@ -373,8 +460,10 @@ namespace ft {
 
 /*************  clear()  *****************/
 	void clear() {
-		for (size_type i = 0; i < _size; ++i)
-			alloc.destroy(&(ptr[i]));
+		size_type i = _size;
+		for (; i > 0; i--) {
+			alloc.destroy(&(ptr[i - 1]));
+		}
 		_size = 0;
 	}
 
