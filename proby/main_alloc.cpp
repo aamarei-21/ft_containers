@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include "stack.hpp"
 
 template <class C>
 void    print(C& c)
@@ -108,40 +109,28 @@ time_t g_end2;
 
 int main()
 {
-	namespace ft = std;
-ft::vector<int> vect;
-ft::vector<int> outvect(10);
-for (int i = 0; i < 10; ++ i)
-	outvect[i] = i * 5;
-for (int i = 0; i < 10; ++i)
-	std:: cout << outvect[i] << ",  ";
-std::cout <<std::endl;
-
-vect.push_back(100);
-ft::vector<int>::iterator it_b;
-ft::vector<int>::iterator it_e;
-ft::vector<int>::iterator it;
-//for (int i = 0; i < 10; ++i)
-//	vect[i] = i;
-
-it_b = ++outvect.begin();
-it_e = --outvect.end();
-it = vect.begin();
-
-//for (int i = 0; i < 10; ++i)
-//	std:: cout << vect[i] << ",  ";
-std:: cout << std::endl;
-std:: cout << "size = " << vect.size() << ", capacity = " << vect.capacity() << std:: endl;
-//++it;
-//++it;
-//++it;
-//std:: cout << "*it = " << *it << std::endl;
-vect.insert(it, it_b, it_e);
-for (int i = 0; i < vect.size(); ++i)
-	std:: cout << vect[i] << ",  ";
-std:: cout << std::endl;
-std:: cout << "size = " << vect.size() << ", capacity = " << vect.capacity() << std:: endl;
-//std:: cout << "*it = " << *it << std::endl;
+//	namespace ft = std;
+	ft::stack<int> stk;
+	std::vector<int> v;
+	ft::vector<int> deque;
+	for (int i = 0; i < 1000000; ++i)
+		deque.push_back(i);
+	for (int i = 1000000; i < 2000000; ++i)
+		stk.push(i);
+	g_start2 = timer();
+	ft::stack<int> stack(deque);
+	ft::stack<int> stack2(stk);
+	ft::stack<int> stack3;
+	stack3 = stack2;
+	g_end2 = timer();
+	while (stack.size() > 0) {
+		v.push_back(stack.top());
+		stack.pop();
+	}
+	while (stack2.size() > 0) {
+		v.push_back(stack2.top());
+		stack2.pop();
+	}
 
 
 

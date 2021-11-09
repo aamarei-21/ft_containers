@@ -9,6 +9,7 @@
 #include "RBNode.hpp"
 #include"Iterator_traits.hpp"
 #include <iostream>
+#include "Iterator.hpp"
 
 namespace ft {
 	template<class T, class P, class R, class A>
@@ -179,6 +180,7 @@ namespace ft {
 		}
 
 		iterator insert(iterator position, const value_type &val) {
+			(void) position;
 			return insert(val).first;
 		}
 
