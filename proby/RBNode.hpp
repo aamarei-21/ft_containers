@@ -75,7 +75,7 @@ public:
 	RBNode() : _Val(value_type()), _parent(NULL), _left(NULL), _right(NULL), _color(1), alloc() {}
 	RBNode(value_type const& arg) : _Val(arg), _parent(NULL), _left(NULL), _right(NULL), _color(1), alloc() {}
 
-	RBNode(RBNode const& other) :_parent(NULL), _left(NULL), _right(NULL), _color(other._color), alloc(), _Val(other._Val) {
+	RBNode(RBNode const& other) : _Val(other._Val), _parent(NULL), _left(NULL), _right(NULL), _color(other._color), alloc() {
 		if (other._left){
 			this->_left = alloc.allocate(1);
 			alloc.construct(this->_left, *other._left);
@@ -167,7 +167,6 @@ public:
 
 	RBNode* increm(){
 		RBNode* temp = this;
-		/* ????????*/
 		if(temp->_right and temp->_right->_parent){
 			temp = temp->_right;
 			while(temp->_left and temp->_left->_left)

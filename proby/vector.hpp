@@ -4,30 +4,25 @@
 #include <iostream>
 #include <memory>
 #include "Iterator_traits.hpp"
-#include "Iterator.hpp"
+#include "vector_Iterator.hpp"
 
 namespace ft {
 	template<class InputIterator>
-			size_t ft_distance(InputIterator first, InputIterator second) {
-				size_t temp(0);
-				for (InputIterator it = first; it != second; ++it)
-					++temp;
-				return temp;
-			}
+	size_t ft_distance(InputIterator first, InputIterator second) {
+		size_t temp(0);
+		for (InputIterator it = first; it != second; ++it)
+			++temp;
+		return temp;
+	}
 
-			template<class T>
-					void ft_swap(T &larg, T &rarg) {
-						T temp_arg;
-						temp_arg = larg;
-						larg = rarg;
-						rarg = temp_arg;
-					}
+	template<class T>
+	void ft_swap(T &larg, T &rarg) {
+		T temp_arg;
+		temp_arg = larg;
+		larg = rarg;
+		rarg = temp_arg;
+	}
 
-//	template<class T>
-//	class Randomiterator;
-//
-//	template<class Iter>
-//	class Reverse_Iterator;
 
 	template<class T, class Alloc = std::allocator<T> >
 	class vector {
@@ -57,7 +52,7 @@ namespace ft {
 		explicit vector(size_type const &size, const T &val = T(), const allocator_type &al = allocator_type())
 		: alloc(al), _size(size), _capacity(size) {
 		ptr = alloc.allocate(_size);
-		for (typename vector<T, Alloc>::size_type i = 0; i < _capacity; ++i)
+		for (size_type i = 0; i < _capacity; ++i)
 			alloc.construct(ptr + i, val);
 	}
 
@@ -66,12 +61,14 @@ namespace ft {
 		   typename enable_if<not is_integral<InputIterator>::value, InputIterator>::type last,
 		   const allocator_type &al = allocator_type()) : alloc(al) {
 		_size = 0;
-		while (first + _size != last)
+		InputIterator temp_it = first;
+		while (temp_it++ != last)
 			++_size;
 		ptr = alloc.allocate(_size);
 		_capacity = _size;
-		for (size_type i = 0; i < _size; ++i)
-			alloc.construct(ptr + i, *(first + i));
+		int i = 0;
+		for (; first != last; ++first, ++i)
+			alloc.construct(ptr + i, *first);
 	}
 
 	vector(const vector &x) : alloc(x.alloc), _size(x._size), _capacity(x._capacity) {
@@ -109,9 +106,9 @@ namespace ft {
 	const_iterator end() const { return ptr + _size; }
 
 /************* rbegin, rend  ****************/
-	reverse_iterator rbegin() { return reverse_iterator (end() - 1); }
+	reverse_iterator rbegin() { return reverse_iterator (end()); }
 
-	const_reverse_iterator rbegin() const { return const_reverse_iterator(end() - 1); }
+	const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
 
 	reverse_iterator rend() { return reverse_iterator(begin()); }
 
@@ -190,7 +187,7 @@ namespace ft {
 /*************  at()  *****************/
 	reference at(size_type pos) {
 		if(pos >= _size || pos < 0)
-			throw std::out_of_range("My_class");
+			throw std::out_of_range("vector");
 		return *(ptr + pos);
 	}
 
@@ -231,21 +228,23 @@ namespace ft {
 template<class InputIterator>
 typename enable_if<not is_integral<InputIterator>::value>::type
 assign(InputIterator first, InputIterator last) {
-	typename vector<T, Alloc>::size_type size;
-
+	size_type size;
 	size = ft_distance(first, last);
+	InputIterator temp_it = first;
+
+
 	if (size <= _capacity) {
-		for (typename vector<T, Alloc>::size_type temp = 0; temp < size; ++temp) {
+		for (size_type temp = 0; temp < size; ++temp) {
 			alloc.destroy(ptr + temp);
-			alloc.construct(ptr + temp, *(first + temp));
+			alloc.construct(ptr + temp, *(temp_it++));
 		}
-		for (typename vector<T, Alloc>::size_type i = size; i < _size; ++i)
+		for (size_type i = size; i < _size; ++i)
 			alloc.destroy(ptr + i);
 	} else {
 		reserve(size);
-		for (typename vector<T, Alloc>::size_type i = 0; i < size; ++i)
-			alloc.construct(ptr + i, *(first + i));
-		for (typename vector<T, Alloc>::size_type i = size; i < _size; ++i)
+		for (size_type i = 0; i < size; ++i)
+			alloc.construct(ptr + i, *(temp_it++));
+		for (size_type i = size; i < _size; ++i)
 			alloc.destroy(ptr + i);
 	}
 	_size = size;
@@ -280,7 +279,7 @@ assign(InputIterator first, InputIterator last) {
 		size_type temp_pos = pos - begin();
 		if (_capacity == 0){
 			size_type temp_size;
-			temp_size = (ptr < pos.get_ptr()) ? ft_distance(ptr, pos.get_ptr()) : ft_distance(pos.get_ptr(), ptr);
+			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : ft_distance(&(*pos), ptr);
 			alloc.deallocate(ptr, _capacity);
 			ptr = alloc.allocate(1);
 			alloc.construct(ptr + temp_size, value);
@@ -290,7 +289,7 @@ assign(InputIterator first, InputIterator last) {
 		}
 		if (_size == _capacity) {
 			size_type temp_size;
-			temp_size = (ptr < pos.get_ptr()) ? ft_distance(ptr, pos.get_ptr()) : -ft_distance(pos.get_ptr(), ptr);
+			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
 			pointer temp_ptr = alloc.allocate(_capacity * 2);
 			size_type i = 0;
 			for (; i < temp_size and i < _size; ++i)
@@ -312,8 +311,8 @@ assign(InputIterator first, InputIterator last) {
 			_size = ft_distance(begin(), pos + 1);
 		} else {
 			for (iterator it = end(); it != pos; --it)
-				alloc.construct(it.get_ptr(), *(it - 1));
-			alloc.construct(pos.get_ptr(), value);
+				alloc.construct(&(*it), *(it - 1));
+			alloc.construct(&(*pos), value);
 			++_size;
 		}
 		return ptr + temp_pos;
@@ -367,32 +366,28 @@ assign(InputIterator first, InputIterator last) {
 //			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
 			alloc.deallocate(ptr, _capacity);
 			ptr = alloc.allocate(count);
-			--second;
+//			--second;
+			size_type temp_cap = count;
 			for (; second != first; ++_size){
-				alloc.construct(ptr + temp_size + count - 1, *(second--));
+				alloc.construct(ptr + temp_size + count - 1, *(--second));
 				--count;
 			}
 			alloc.construct(ptr + temp_size + count - 1, *second);
-			_capacity = count;
+			_capacity = temp_cap;
 			return;
 		}
 
-//	std::cout <<"count = " << count << std::endl;
 		if (_size + count > _capacity) {
 			size_type temp_size;
 			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
-//	std::cout <<"temp_size = " << temp_size << std::endl;
 			size_type temp_capacity = (_size + count > 2 * _capacity) ? _size + count : 2 * _capacity;
-//	std::cout <<"temp_capacity  = " << temp_capacity << std::endl;
 			pointer temp_ptr = alloc.allocate(temp_capacity);
 			iterator it = begin();
-//	std::cout <<"*it (insert) = " << *it << std::endl;
-//	std::cout <<"*pos (insert) = " << *pos << std::endl;
 			size_type i = 0;
 			for(; it != pos and it != end(); ++it, ++i)
 				alloc.construct(temp_ptr + i, *it);
 			for (size_type j = 0; j < count; j++)
-				alloc.construct(temp_ptr + temp_size + j, *(first + j));
+				alloc.construct(temp_ptr + temp_size + j, *(first++));
 			if (it == pos){
 				for (; it != end(); ++it, ++i)
 					alloc.construct(temp_ptr + count + i, *it);
@@ -409,13 +404,13 @@ assign(InputIterator first, InputIterator last) {
 		}
 		else if (pos >= end()) {
 			for (size_type i = 0; i < count; ++i)
-				alloc.construct((pos + i).get_ptr(), *(first + i));
+				alloc.construct(&(*(pos + i)), *(first++));
 			_size = ft_distance(begin(), pos + count);
 		} else {
 			for (iterator it = end() + count; it != pos; --it)
-				alloc.construct(it.get_ptr(), *(it - count));
+				alloc.construct(&(*it), *(it - count));
 			for (size_type i = 0; i < count; ++i)
-				alloc.construct((pos + i).get_ptr(), *(first + i));
+				alloc.construct(&(*(pos + i)), *(first++));
 			_size += count;
 		}
 	}
@@ -436,13 +431,13 @@ assign(InputIterator first, InputIterator last) {
 		size_type count = ft_distance(first, last);
 		if (count < 0)
 			return last;
-		size_type i = 0;
+		size_type i = ft_distance(begin(), first);
 		for (; i + count < _size; ++i){
 			ptr[i] = ptr[i + count];
 		}
 //			alloc.construct((first + i).get_ptr(), *(last + i));
 //		for (; i < _size; ++i){
-//			alloc.construct(it.get_ptr(), *(last + count));
+//			alloc.construct(&(*it), *(last + count));
 //			++count;
 //		}
 		_size -= count;
@@ -479,10 +474,7 @@ assign(InputIterator first, InputIterator last) {
 	friend bool operator==(const vector &lhs, const vector &rhs) {
 		if (lhs._size != rhs._size)
 			return false;
-		for (size_type i = 0; i < lhs._size; ++i)
-			if (*(lhs.ptr + i) != *(rhs.ptr + i))
-				return false;
-			return true;
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 
 

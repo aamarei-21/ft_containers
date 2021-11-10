@@ -1,19 +1,17 @@
-//
-// Created by Annelle Amarei on 10/28/21.
-//
-
 #ifndef MAP_HPP
 #define MAP_HPP
 
 #include "pair.hpp"
 #include "RBNode.hpp"
-#include"Iterator_traits.hpp"
-#include <iostream>
-#include "Iterator.hpp"
+//#include"Iterator_traits.hpp"
+//#include <iostream>
+#include "map_iterator.hpp"
+#include <memory>
+#include <functional>
 
 namespace ft {
-	template<class T, class P, class R, class A>
-	class BidirecIterator;
+//	template<class T, class P, class R, class A>
+//	class BidirecIterator;
 
 
 	template<class Key,
@@ -23,19 +21,19 @@ namespace ft {
 	class map {
 
 	public:
-		typedef Allocator allocator_type;
-		typedef Compare key_compare;
-		typedef Key key_type;
-		typedef T mapped_type;
-		typedef pair<const Key, T> value_type;
-		typedef RBNode<value_type, allocator_type> node_type;
-		typedef BidirecIterator<value_type, value_type *, value_type &, allocator_type> iterator;
-		typedef BidirecIterator<value_type, const value_type *, const value_type &, allocator_type> const_iterator;
-		typedef Reverse_BiIterator <iterator> reverse_iterator;
-		typedef Reverse_BiIterator <const_iterator> const_reverse_iterator;
-		typedef typename allocator_type::template rebind<node_type>::other allocator_node;
-		typedef typename allocator_node::pointer pointer;
-		typedef typename std::allocator<node_type>::const_pointer const_pointer;
+		typedef Allocator 																					allocator_type;
+		typedef Compare 																					key_compare;
+		typedef Key 																						key_type;
+		typedef T 																							mapped_type;
+		typedef pair<const Key, T> 																			value_type;
+		typedef RBNode<value_type, allocator_type> 															node_type;
+		typedef BidirecIterator<value_type, value_type *, value_type &, allocator_type> 					iterator;
+		typedef BidirecIterator<value_type, const value_type *, const value_type &, allocator_type> 		const_iterator;
+		typedef Reverse_BiIterator <iterator> 																reverse_iterator;
+		typedef Reverse_BiIterator <const_iterator> 														const_reverse_iterator;
+		typedef typename allocator_type::template rebind<node_type>::other 									allocator_node;
+		typedef typename allocator_node::pointer 															pointer;
+		typedef typename std::allocator<node_type>::const_pointer 											const_pointer;
 		typedef size_t size_type;
 
 		class value_comp {
@@ -62,7 +60,7 @@ namespace ft {
 /**************************** Constructor **********************************/
 
 		explicit map(const Compare &comp = key_compare(), const Allocator &alloc = Allocator()) :
-				_root(NULL), _comp(comp), alloc(alloc), _size(0) {
+		_root(NULL), alloc(alloc), _comp(comp), _size(0) {
 			imaginary_nodes();
 		}
 
@@ -71,19 +69,26 @@ namespace ft {
 			typename enable_if<std::__is_input_iterator<InputIterator>::value, InputIterator>::type last,
 			const Compare &comp = Compare(),
 			const Allocator &alloc = Allocator()) :
-				_root(NULL), _comp(comp), alloc(alloc), _size(0) {
+			_root(NULL), alloc(alloc), _comp(comp), _size(0) {
 			imaginary_nodes();
 			for (; first != last; ++first)
 				insert(*first);
 		}
 
-
-		map(const map &x) : _root(NULL), _comp(x._comp), alloc(x.alloc), _size(x._size) {
+		map(const map &x) : _root(NULL), _first(NULL), _last(NULL), alloc(x.alloc), _comp(x._comp), _size(x._size) {
 			if (x._root) {
-				imaginary_nodes();
 				_root = alloc.allocate(1);
 				alloc.construct(_root, *x._root);
-			}
+				pointer temp = _root;
+				while (temp->_left)
+					temp = temp->_left;
+				_first = temp;
+				temp = _root;
+				while (temp->_right)
+					temp = temp->_right;
+				_last = temp;
+			} else
+				imaginary_nodes();
 		}
 
 /**************************** Destructor **********************************/
@@ -100,7 +105,7 @@ namespace ft {
 				alloc.destroy(_first);
 				alloc.destroy(_last);
 				alloc.deallocate(_first, 1);
-//			alloc.deallocate(_last, 1);
+				alloc.deallocate(_last, 1);
 			}
 		}
 
@@ -113,10 +118,21 @@ namespace ft {
 				alloc.destroy(_root);
 				alloc.deallocate(_root, 1);
 			}
-			this->imaginary_nodes();
-			_root = alloc.allocate(1);
-			alloc.construct(_root, *x._root);
-			_size = x._size;
+			_root = NULL;
+			if (x._root) {
+				_root = alloc.allocate(1);
+				alloc.construct(_root, *x._root);
+				_size = x._size;
+				pointer temp = _root;
+				while (temp->_left)
+					temp = temp->_left;
+				_first = temp;
+				temp = _root;
+				while (temp->_right)
+					temp = temp->_right;
+				_last = temp;
+			} else
+				imaginary_nodes();
 			return *this;
 		}
 
@@ -148,6 +164,20 @@ namespace ft {
 
 /**************************** Element access **********************************/
 
+		mapped_type& at( const Key& key ){
+			node_type *node = find_node(key);
+			if (!node)
+				throw std::out_of_range("map");
+			return (node->_Val.second);
+		}
+
+		const mapped_type& at( const Key& key ) const{
+			node_type *node = find_node(key);
+			if (!node)
+				throw std::out_of_range("map");
+			return (node->_Val.second);
+		}
+
 		mapped_type &operator[](const key_type &k) {
 			return (*((this->insert(make_pair(k, mapped_type()))).first)).second;
 		}
@@ -157,7 +187,7 @@ namespace ft {
 
 		pair<iterator, bool> insert(const value_type &val) {
 			if (_size == 0)
-				return ::make_pair(iterator(make_head(val)), true);
+				return ft::make_pair(iterator(make_head(val)), true);
 			pointer temp = _root;
 			pointer previous;
 			while (temp->_left) { //пока не дойдем по последнего узла (то есть за ним следует лист)
@@ -167,16 +197,16 @@ namespace ft {
 				else if (key_comp()(temp->_Val.first, val.first))
 					temp = temp->_right;
 				else
-					return (::make_pair(iterator(temp), false));
+					return (ft::make_pair(iterator(temp), false));
 
 			}
 			temp = previous;
 			if (key_comp()(val.first, temp->_Val.first))
-				return (::make_pair(iterator(make_left(val, temp)), true));
+				return (ft::make_pair(iterator(make_left(val, temp)), true));
 			else if (key_comp()(temp->_Val.first, val.first))
-				return (::make_pair(iterator(make_right(val, temp)), true));
+				return (ft::make_pair(iterator(make_right(val, temp)), true));
 			else  //найден такой же ключ как и у val
-				return (::make_pair(iterator(temp), false));
+				return (ft::make_pair(iterator(temp), false));
 		}
 
 		iterator insert(iterator position, const value_type &val) {
@@ -194,8 +224,7 @@ namespace ft {
 /****************************erase() **********************************/
 
 		void erase(iterator pos) {
-			Key key = pos->first;
-			erase(key);
+			erase(pos->first);
 		}
 
 		void erase(iterator first, iterator last) {
@@ -209,7 +238,7 @@ namespace ft {
 
 		size_type erase(const Key &key) {
 			node_type *node = find_node(key);
-			if (!node->_left)
+			if (!node or !node->_left)
 				return 0;
 			if (node->_left->_left and node->_right->_left) { // узел имеет два потомка - случай 1
 				node_type *temp = search_max(node->_left);
@@ -246,12 +275,14 @@ namespace ft {
 /**************************** clear () **********************************/
 
 		void clear() {
-			_first->_parent->_left = NULL;
-			_first->_parent = _last;
-			_last->_parent->_right = NULL;
-			_last->_parent = NULL;
-			alloc.destroy(_root);
-			alloc.deallocate(_root, 1);
+			if (_root) {
+				_first->_parent->_left = NULL;
+				_first->_parent = _last;
+				_last->_parent->_right = NULL;
+				_last->_parent = NULL;
+				alloc.destroy(_root);
+				alloc.deallocate(_root, 1);
+			}
 			_root = NULL;
 			_size = 0;
 		}
@@ -397,17 +428,38 @@ namespace ft {
 /**************************** equal_range () **********************************/
 
 		pair<iterator, iterator> equal_range(const key_type &k) {
-			return ::make_pair(lower_bound(k), upper_bound(k));
+			return make_pair(lower_bound(k), upper_bound(k));
 		}
 
 		pair<const_iterator, const_iterator> equal_range(const key_type &k) const {
-			return ::make_pair(lower_bound(k), upper_bound(k));
+			return make_pair(lower_bound(k), upper_bound(k));
 		}
 
 
 /**************************** get_allocator () **********************************/
 
 		allocator_type get_allocator() const { return alloc; }
+
+
+/* ===============  NON-MEMBER FUNCTION OVERLOADS: ================= */
+
+	friend	bool operator==(const map& lhs, const map& rhs ){
+		if (lhs._size != rhs._size)
+			return false;
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+
+	friend bool operator!=( const map& lhs, const map& rhs ) { return !(lhs == rhs); }
+
+	friend bool operator<( const map& lhs, const map& rhs ) {
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
+
+	friend bool operator>( const map& lhs, const map& rhs ) { return rhs < lhs; }
+
+	friend bool operator<=(const map& lhs, const map& rhs) { return !(lhs > rhs); }
+
+	friend bool operator>=(const map& lhs, const map& rhs) { return !(lhs < rhs); }
 
 
 /* ******************* Вспомогательные функции ****************** */
@@ -440,13 +492,15 @@ namespace ft {
 
 		node_type *find_node(const Key &key) {
 			pointer temp = _root;
-			while (temp->_left) {
-				if (key_comp()(key, temp->_Val.first))
-					temp = temp->_left;
-				else if (key_comp()(temp->_Val.first, key))
-					temp = temp->_right;
-				else
-					return temp;
+			if (temp) {
+				while (temp->_left) {
+					if (key_comp()(key, temp->_Val.first))
+						temp = temp->_left;
+					else if (key_comp()(temp->_Val.first, key))
+						temp = temp->_right;
+					else
+						return temp;
+				}
 			}
 			return temp;
 		}
@@ -643,7 +697,6 @@ namespace ft {
 			pointer G = ptr->grandfather();
 			pointer U = ptr->uncle();
 			if (P->_color == RED and U->_color == RED) { //случай 3
-				//			std::cout << "swap color\n";
 				P->_color = BLACK;
 				U->_color = BLACK;
 				G->_color = RED;
@@ -670,7 +723,6 @@ namespace ft {
 		}
 
 		void LeftTurn(pointer root) {
-			//		std::cout << "LeftTurn\n";
 			node_type *RightSubTree = root->_right;
 			node_type *RightSubTreeLeft = RightSubTree->_left;
 			if (root->_parent) {
@@ -688,7 +740,6 @@ namespace ft {
 		}
 
 		void RightTurn(pointer root) {
-			//		std::cout << "RightTurn\n";
 			node_type *LeftSubTree = root->_left;
 			node_type *LeftSubTreeRight = LeftSubTree->_right;
 			if (root->_parent) {
@@ -705,8 +756,6 @@ namespace ft {
 				LeftSubTreeRight->_parent = root;
 		}
 
-		/* ******************* Вспомогательные функции ****************** */
-
 	};
 } //namespace ft
-#endif //MAP_HPP
+#endif

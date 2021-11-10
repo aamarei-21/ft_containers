@@ -4,9 +4,9 @@
 #include <set>
 #include <list>
 #include <iostream>
-#include "Iterator.hpp"
+#include "vector_Iterator.hpp"
 #include "pair.hpp"
-//#include "map.hpp"
+#include "map.hpp"
 #include <map>
 #include <string>
 #include <fstream>
@@ -107,32 +107,56 @@ time_t g_start2;
 time_t g_end2;
 
 
-int main()
+#include "common.hpp"
+#ifndef TESTED_NAMESPACE
+# define TESTED_NAMESPACE ft
+#endif
+
+
+#define TESTED_TYPE int
+
+void	checkErase(TESTED_NAMESPACE::vector<TESTED_TYPE> const &vct,
+				   TESTED_NAMESPACE::vector<TESTED_TYPE>::const_iterator const &it)
+				   {
+	static int i = 0;
+	std::cout << "[" << i++ << "] " << "erase: " << it - vct.begin() << std::endl;
+	printSize(vct);
+				   }
+
+int		main(void)
 {
-//	namespace ft = std;
-	ft::stack<int> stk;
 	std::vector<int> v;
-	ft::vector<int> deque;
-	for (int i = 0; i < 1000000; ++i)
-		deque.push_back(i);
-	for (int i = 1000000; i < 2000000; ++i)
-		stk.push(i);
+	ft::map<int, int> mp;
+	v.push_back(mp.erase(3));
+	for (int i = 0, j = 0; i < 300000 ; ++i, ++j)
+		mp.insert(ft::make_pair(i, j));
+	ft::map<int, int>::iterator it = mp.begin();
+	v.push_back(it->first);
+	v.push_back(mp.erase(-5));
+	v.push_back(mp.size());
+	v.push_back(mp.erase(0));
+	v.push_back(mp.size());
+	it = mp.begin();
+	v.push_back(it->first);
+	ft::map<int, int>::iterator it4 = mp.begin();
 	g_start2 = timer();
-	ft::stack<int> stack(deque);
-	ft::stack<int> stack2(stk);
-	ft::stack<int> stack3;
-	stack3 = stack2;
+	for (; it4 != mp.end(); it4 = mp.begin())
+		mp.erase(it4->first);
 	g_end2 = timer();
-	while (stack.size() > 0) {
-		v.push_back(stack.top());
-		stack.pop();
+	ft::map<int, int>::iterator it2 = mp.end();
+	it2--;
+	v.push_back(mp.erase(299999));
+	v.push_back(mp.size());
+	ft::map<int, int> mp2;
+	for (int i = 0, j = 0; i < 10 ; ++i, ++j)
+		mp2.insert(ft::make_pair(i, j));
+	mp2.erase(2);
+	mp2.erase(7);
+	ft::map<int, int>::iterator it3 = mp2.begin();
+	for (; it3 != mp2.end(); ++it3) {
+		v.push_back(it3->first);
+		v.push_back(it3->second);
 	}
-	while (stack2.size() > 0) {
-		v.push_back(stack2.top());
-		stack2.pop();
-	}
-
-
 
 }
 
