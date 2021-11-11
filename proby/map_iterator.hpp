@@ -12,6 +12,8 @@ namespace ft {
 	template<class T, class P, class R, class A> //class  bool isConst>
 	class BidirecIterator : public std::iterator<std::bidirectional_iterator_tag, T> {
 	public:
+		typedef BidirecIterator<T, T*, T&, A> iterator;
+		typedef BidirecIterator<T, const T*, const T&, A> const_iterator;
 		typedef P pointer;
 		typedef T value_type;
 		typedef ptrdiff_t difference_type;
@@ -21,14 +23,16 @@ namespace ft {
 		typedef RBNode <T, A> node_type;
 
 	private:
-		node_type *_ptr;
 	public:
+		node_type *_ptr;
 
 		BidirecIterator() {}
 
-		BidirecIterator(BidirecIterator const &iter) : _ptr(iter._ptr) {}
+		BidirecIterator(iterator const &iter) : _ptr(iter._ptr) {}
 
-		BidirecIterator(const node_type *x) : _ptr(const_cast<node_type *>(x)) {}
+//		BidirecIterator(const_iterator const &iter) : _ptr((iter._ptr)) {}
+
+		BidirecIterator(node_type *x) : _ptr((x)) {}
 
 		BidirecIterator &operator=(BidirecIterator const &x) {
 			if (this != &x)
@@ -59,20 +63,21 @@ namespace ft {
 		}
 
 		reference operator*() { return _ptr->_Val; }
+		reference operator*() const { return _ptr->_Val; }
 
-		pointer operator->() { return &(_ptr->_Val); }
+		pointer operator->() const { return &(_ptr->_Val); }
 
 /* ************  Non-member functions  *****************/
 
-		template<class _T, class _P, class _R, class _A>
-		friend bool operator==(BidirecIterator<_T, _P, _R, _A> const &lhs, BidirecIterator<_T, _P, _R, _A> const &rhs) {
-			return lhs._ptr == rhs._ptr;
-		}
+template<class _T, class _P, class _R, class _A, class _T1, class _P1, class _R1, class _A1>
+friend bool operator==(BidirecIterator<_T, _P, _R, _A> const &lhs, BidirecIterator<_T1, _P1, _R1, _A1> const &rhs) {
+	return lhs._ptr == rhs._ptr;
+}
 
-		template<class _T, class _P, class _R, class _A>
-		friend bool operator!=(BidirecIterator<_T, _P, _R, _A> const &lhs, BidirecIterator<_T, _P, _R, _A> const &rhs) {
-			return !(lhs == rhs);
-		}
+template<class _T, class _P, class _R, class _A, class _T1, class _P1, class _R1, class _A1>
+friend bool operator!=(BidirecIterator<_T, _P, _R, _A> const &lhs, BidirecIterator<_T1, _P1, _R1, _A1> const &rhs) {
+	return !(lhs == rhs);
+}
 
 
 	};
@@ -90,11 +95,13 @@ namespace ft {
 		Iter _itr;
 
 	public:
+
 		Reverse_BiIterator() : _itr() {}
 
 		explicit Reverse_BiIterator(Iter x) : _itr(x) {}
 
-		Reverse_BiIterator(const Reverse_BiIterator &other) : _itr(other._itr) {}
+		template<class _Iter>
+		Reverse_BiIterator(const Reverse_BiIterator<_Iter> &other) : _itr(other.base()) {}
 
 		Iter base() const { return _itr; }
 
@@ -121,12 +128,12 @@ namespace ft {
 			return tmp;
 		}
 
-		reference operator*() {
+		reference operator*() const {
 			Iter temp = _itr;
 			return *(--temp);
 		}
 
-		pointer operator->() { return &(operator*()); }
+		pointer operator->() const { return &(operator*()); }
 
 		/* ************  Non-member functions  *****************/
 
@@ -143,77 +150,77 @@ namespace ft {
 
 
 
-	/* =============const_BidirecIterator========================================== */
-
-
-	template<class T, class P, class R, class A> //class  bool isConst>
-	class const_BidirecIterator : public std::iterator<std::bidirectional_iterator_tag, T> {
-	public:
-		typedef P 									pointer;
-		typedef T 									iterator_type;
-		typedef ptrdiff_t 							difference_type;
-		typedef R 									reference;
-		typedef const T 							&const_reference;
-		typedef std::bidirectional_iterator_tag 	iterator_category;
-		typedef RBNode <T, A> 						node_type;
-
-	private:
-		iterator_type _ptr;
-	public:
-
-		const_BidirecIterator() {}
-
-		const_BidirecIterator(const_BidirecIterator const &iter) : _ptr(iter._ptr) {}
-
-		const_BidirecIterator(const node_type *x) : _ptr(const_cast<node_type *>(x)) {}
-
-		const_BidirecIterator &operator=(const_BidirecIterator const &x) {
-			if (this != &x)
-				_ptr = x._ptr;
-			return *this;
-		}
-
-		const_BidirecIterator &operator++() {
-			++_ptr;
-			return *this;
-		}
-
-		const_BidirecIterator operator++(int) {
-			const_BidirecIterator tmp(*this);
-			++(*this);
-			return tmp;
-		}
-
-		const_BidirecIterator &operator--() {
-			--_ptr;
-			return *this;
-		}
-
-		const_BidirecIterator operator--(int) {
-			const_BidirecIterator tmp(*this);
-			--(*this);
-			return tmp;
-		}
-
-		reference operator*() { return *_ptr; }
-
-		pointer operator->() { return &(*_ptr); }
-
-		/* ************  Non-member functions  *****************/
-
-		template<class _T, class _P, class _R, class _A>
-		friend bool operator==(const_BidirecIterator<_T, _P, _R, _A> const &lhs, const_BidirecIterator<_T, _P, _R, _A> const &rhs) {
-			return lhs._ptr == rhs._ptr;
-		}
-
-		template<class _T, class _P, class _R, class _A>
-		friend bool operator!=(const_BidirecIterator<_T, _P, _R, _A> const &lhs, const_BidirecIterator<_T, _P, _R, _A> const &rhs) {
-			return !(lhs == rhs);
-		}
-
-
-	};
-	/* ================================================= */
+//	/* =============const_BidirecIterator========================================== */
+//
+//
+//	template<class T, class P, class R, class A> //class  bool isConst>
+//	class const_BidirecIterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+//	public:
+//		typedef P 									pointer;
+//		typedef T 									iterator_type;
+//		typedef ptrdiff_t 							difference_type;
+//		typedef R 									reference;
+//		typedef const T 							&const_reference;
+//		typedef std::bidirectional_iterator_tag 	iterator_category;
+//		typedef RBNode <T, A> 						node_type;
+//
+//	private:
+//		iterator_type _ptr;
+//	public:
+//
+//		const_BidirecIterator() {}
+//
+//		const_BidirecIterator(const_BidirecIterator const &iter) : _ptr(iter._ptr) {}
+//
+//		const_BidirecIterator(const node_type *x) : _ptr(const_cast<node_type *>(x)) {}
+//
+//		const_BidirecIterator &operator=(const_BidirecIterator const &x) {
+//			if (this != &x)
+//				_ptr = x._ptr;
+//			return *this;
+//		}
+//
+//		const_BidirecIterator &operator++() {
+//			++_ptr;
+//			return *this;
+//		}
+//
+//		const_BidirecIterator operator++(int) {
+//			const_BidirecIterator tmp(*this);
+//			++(*this);
+//			return tmp;
+//		}
+//
+//		const_BidirecIterator &operator--() {
+//			--_ptr;
+//			return *this;
+//		}
+//
+//		const_BidirecIterator operator--(int) {
+//			const_BidirecIterator tmp(*this);
+//			--(*this);
+//			return tmp;
+//		}
+//
+//		reference operator*() { return *_ptr; }
+//
+//		pointer operator->() { return &(*_ptr); }
+//
+//		/* ************  Non-member functions  *****************/
+//
+//		template<class _T, class _P, class _R, class _A>
+//		friend bool operator==(const_BidirecIterator<_T, _P, _R, _A> const &lhs, const_BidirecIterator<_T, _P, _R, _A> const &rhs) {
+//			return lhs._ptr == rhs._ptr;
+//		}
+//
+//		template<class _T, class _P, class _R, class _A>
+//		friend bool operator!=(const_BidirecIterator<_T, _P, _R, _A> const &lhs, const_BidirecIterator<_T, _P, _R, _A> const &rhs) {
+//			return !(lhs == rhs);
+//		}
+//
+//
+//	};
+//	/* ================================================= */
 } //namespace
 
 #endif

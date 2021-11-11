@@ -36,11 +36,12 @@ namespace ft {
 		typedef typename std::allocator<node_type>::const_pointer 											const_pointer;
 		typedef size_t size_type;
 
-		class value_comp {
+		class value_compare {
+			friend class map;
 		protected:
 			Compare comp;
+			explicit value_compare(Compare c) : comp(c) {}
 		public:
-			value_comp(Compare c) : comp(c) {}  // constructed with map's comparison object
 			bool operator()(const value_type &x, const value_type &y) const {
 				return comp(x.first, y.first);
 			}
@@ -60,7 +61,7 @@ namespace ft {
 /**************************** Constructor **********************************/
 
 		explicit map(const Compare &comp = key_compare(), const Allocator &alloc = Allocator()) :
-		_root(NULL), alloc(alloc), _comp(comp), _size(0) {
+		_root(NULL), _first(NULL), _last(NULL), alloc(alloc), _comp(comp), _size(0) {
 			imaginary_nodes();
 		}
 
@@ -106,6 +107,8 @@ namespace ft {
 				alloc.destroy(_last);
 				alloc.deallocate(_first, 1);
 				alloc.deallocate(_last, 1);
+				_last = NULL;
+				_first = NULL;
 			}
 		}
 
@@ -179,7 +182,7 @@ namespace ft {
 		}
 
 		mapped_type &operator[](const key_type &k) {
-			return (*((this->insert(make_pair(k, mapped_type()))).first)).second;
+			return (*((this->insert(ft::make_pair(k, mapped_type()))).first)).second;
 		}
 
 /**************************** insert () **********************************/
@@ -269,6 +272,12 @@ namespace ft {
 			node_type *temp = this->_root;
 			this->_root = x._root;
 			x._root = temp;
+			temp = this->_first;
+			this->_first = x._first;
+			x._first = temp;
+			temp = this->_last;
+			this->_last = x._last;
+			x._last = temp;
 			swap(this->_size, x._size);
 		}
 
@@ -291,14 +300,16 @@ namespace ft {
 
 		key_compare key_comp() const { return key_compare(); }
 
+		value_compare value_comp() const { return value_compare(key_compare()); }
+
 
 /**************************** find() **********************************/
 		iterator find(const Key &key) {
 			pointer temp = _root;
 			while (temp->_left) {
-				if (key_comp()(key, temp->_left->_Val.first))
+				if (key_comp()(key, temp->_Val.first))
 					temp = temp->_left;
-				else if (key_comp()(temp->_right->_Val.first, key))
+				else if (key_comp()(temp->_Val.first, key))
 					temp = temp->_right;
 				else
 					return iterator(temp);
@@ -309,9 +320,9 @@ namespace ft {
 		const_iterator find(const Key &key) const {
 			pointer temp = _root;
 			while (temp->_left) {
-				if (key_comp()(key, temp->_left->_Val.first))
+				if (key_comp()(key, temp->_Val.first))
 					temp = temp->_left;
-				else if (key_comp()(temp->_right->_Val.first, key))
+				else if (key_comp()(temp->_Val.first, key))
 					temp = temp->_right;
 				else
 					return iterator(temp);
@@ -428,11 +439,11 @@ namespace ft {
 /**************************** equal_range () **********************************/
 
 		pair<iterator, iterator> equal_range(const key_type &k) {
-			return make_pair(lower_bound(k), upper_bound(k));
+			return ft::make_pair(lower_bound(k), upper_bound(k));
 		}
 
 		pair<const_iterator, const_iterator> equal_range(const key_type &k) const {
-			return make_pair(lower_bound(k), upper_bound(k));
+			return ft::make_pair(lower_bound(k), upper_bound(k));
 		}
 
 
@@ -758,4 +769,11 @@ namespace ft {
 
 	};
 } //namespace ft
+
+namespace std {
+	template<class Key, class T, class Compare, class Alloc>
+	void swap(ft::map<Key, T, Compare, Alloc> &lhs,
+			  ft::map<Key, T, Compare, Alloc> &rhs) { lhs.swap(rhs); }
+}
+
 #endif

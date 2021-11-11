@@ -200,15 +200,15 @@ public:
 //				parent = parent->_left;
 			} else { // parent->_right == node
 				if (!node->_right->_left) {
-					parent->_right = node->_left;
-					if (node->_left->_parent)
-						node->_left->_parent = parent;
-					node->_left = NULL;
-				} else {
 					parent->_right = node->_right;
 					if (node->_right->_parent)
 						node->_right->_parent = parent;
 					node->_right = NULL;
+				} else {
+					parent->_right = node->_left;
+					if (node->_left->_parent)
+						node->_left->_parent = parent;
+					node->_left = NULL;
 				}
 //				parent = parent->_right;
 			}

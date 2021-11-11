@@ -503,7 +503,6 @@ assign(InputIterator first, InputIterator last) {
 		void swap(ft::vector<V, Al> &lhs, ft::vector<V, Al> &rhs) { lhs.swap(rhs); }
 	}
 
-//#include "vector.cpp"
 
 #endif
 
