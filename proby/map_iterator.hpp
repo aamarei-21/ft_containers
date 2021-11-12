@@ -2,7 +2,6 @@
 #define MAP_ITERATOR_HPP_
 
 #include "Iterator_traits.hpp"
-//#include "RBNode.hpp"
 
 ///* ******************************************************************************** */
 ///* **********************************  BidirecIterator **************************** */
@@ -12,15 +11,15 @@ namespace ft {
 	template<class T, class P, class R, class A> //class  bool isConst>
 	class BidirecIterator : public std::iterator<std::bidirectional_iterator_tag, T> {
 	public:
-		typedef BidirecIterator<T, T*, T&, A> iterator;
-		typedef BidirecIterator<T, const T*, const T&, A> const_iterator;
-		typedef P pointer;
-		typedef T value_type;
-		typedef ptrdiff_t difference_type;
-		typedef R reference;
-		typedef const T &const_reference;
-		typedef std::bidirectional_iterator_tag iterator_category;
-		typedef RBNode <T, A> node_type;
+		typedef BidirecIterator<T, T*, T&, A> 				iterator;
+		typedef BidirecIterator<T, const T*, const T&, A> 	const_iterator;
+		typedef P 											pointer;
+		typedef T 											value_type;
+		typedef ptrdiff_t 									difference_type;
+		typedef R 											reference;
+		typedef const T&									const_reference;
+		typedef std::bidirectional_iterator_tag 			iterator_category;
+		typedef RBNode <T, A> 								node_type;
 
 	private:
 	public:
@@ -148,79 +147,6 @@ friend bool operator!=(BidirecIterator<_T, _P, _R, _A> const &lhs, BidirecIterat
 		}
 	};
 
-
-
-//	/* =============const_BidirecIterator========================================== */
-//
-//
-//	template<class T, class P, class R, class A> //class  bool isConst>
-//	class const_BidirecIterator : public std::iterator<std::bidirectional_iterator_tag, T> {
-//	public:
-//		typedef P 									pointer;
-//		typedef T 									iterator_type;
-//		typedef ptrdiff_t 							difference_type;
-//		typedef R 									reference;
-//		typedef const T 							&const_reference;
-//		typedef std::bidirectional_iterator_tag 	iterator_category;
-//		typedef RBNode <T, A> 						node_type;
-//
-//	private:
-//		iterator_type _ptr;
-//	public:
-//
-//		const_BidirecIterator() {}
-//
-//		const_BidirecIterator(const_BidirecIterator const &iter) : _ptr(iter._ptr) {}
-//
-//		const_BidirecIterator(const node_type *x) : _ptr(const_cast<node_type *>(x)) {}
-//
-//		const_BidirecIterator &operator=(const_BidirecIterator const &x) {
-//			if (this != &x)
-//				_ptr = x._ptr;
-//			return *this;
-//		}
-//
-//		const_BidirecIterator &operator++() {
-//			++_ptr;
-//			return *this;
-//		}
-//
-//		const_BidirecIterator operator++(int) {
-//			const_BidirecIterator tmp(*this);
-//			++(*this);
-//			return tmp;
-//		}
-//
-//		const_BidirecIterator &operator--() {
-//			--_ptr;
-//			return *this;
-//		}
-//
-//		const_BidirecIterator operator--(int) {
-//			const_BidirecIterator tmp(*this);
-//			--(*this);
-//			return tmp;
-//		}
-//
-//		reference operator*() { return *_ptr; }
-//
-//		pointer operator->() { return &(*_ptr); }
-//
-//		/* ************  Non-member functions  *****************/
-//
-//		template<class _T, class _P, class _R, class _A>
-//		friend bool operator==(const_BidirecIterator<_T, _P, _R, _A> const &lhs, const_BidirecIterator<_T, _P, _R, _A> const &rhs) {
-//			return lhs._ptr == rhs._ptr;
-//		}
-//
-//		template<class _T, class _P, class _R, class _A>
-//		friend bool operator!=(const_BidirecIterator<_T, _P, _R, _A> const &lhs, const_BidirecIterator<_T, _P, _R, _A> const &rhs) {
-//			return !(lhs == rhs);
-//		}
-//
-//
-//	};
-//	/* ================================================= */
 } //namespace
 
 #endif

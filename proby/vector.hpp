@@ -363,10 +363,8 @@ assign(InputIterator first, InputIterator last) {
 		count = ft_distance(first, second);
 		if (_capacity == 0){
 			size_type temp_size = ft_distance(ptr, &(*pos));
-//			temp_size = (ptr < &(*pos)) ? ft_distance(ptr, &(*pos)) : -ft_distance(&(*pos), ptr);
 			alloc.deallocate(ptr, _capacity);
 			ptr = alloc.allocate(count);
-//			--second;
 			size_type temp_cap = count;
 			for (; second != first; ++_size){
 				alloc.construct(ptr + temp_size + count - 1, *(--second));
@@ -426,8 +424,6 @@ assign(InputIterator first, InputIterator last) {
 	}
 
 	iterator erase(iterator first, iterator last) {
-//		size_type count = last - first;
-//		size_type n_ = first - begin();
 		size_type count = ft_distance(first, last);
 		if (count < 0)
 			return last;
@@ -435,11 +431,6 @@ assign(InputIterator first, InputIterator last) {
 		for (; i + count < _size; ++i){
 			ptr[i] = ptr[i + count];
 		}
-//			alloc.construct((first + i).get_ptr(), *(last + i));
-//		for (; i < _size; ++i){
-//			alloc.construct(&(*it), *(last + count));
-//			++count;
-//		}
 		_size -= count;
 		return first;
 	}
