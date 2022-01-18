@@ -4,7 +4,6 @@
 
 #include "Iterator_traits.hpp"
 
-
 namespace ft {
 	template<class T>
 	class Randomiterator  {  //: public std::iterator<std::random_access_iterator_tag, T>
@@ -16,14 +15,14 @@ namespace ft {
 		typedef typename iterator_traits<T>::reference reference;
 		typedef std::random_access_iterator_tag iterator_category;
 
-
 	private:
 		iterator_type ptr;
 	public:
 		Randomiterator() {}
 
 		Randomiterator(iterator_type x) :  ptr(x) {}
-		template<class _T>
+		
+        template<class _T>
 		Randomiterator(const Randomiterator<_T> &iter) : ptr(&(*iter)) {}
 
 		Randomiterator &operator++() {
@@ -49,7 +48,6 @@ namespace ft {
 		}
 
 		Randomiterator operator+(difference_type const &x) const {
-//			Randomiterator temp(ptr);
 			return ptr + x;
 		}
 

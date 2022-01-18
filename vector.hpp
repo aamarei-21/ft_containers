@@ -23,7 +23,6 @@ namespace ft {
 		rarg = temp_arg;
 	}
 
-
 	template<class T, class Alloc = std::allocator<T> >
 	class vector {
 	public:
@@ -175,7 +174,6 @@ namespace ft {
 			ptr = temp_ptr;
 		}
 	}
-
 
 /* ======================  ELEMENT ACCES:  ====================== */
 
@@ -480,8 +478,6 @@ assign(InputIterator first, InputIterator last) {
 	friend bool operator>(const vector &lhs, const vector &rhs) { return (rhs < lhs); }
 
 	friend bool operator>=(const vector &lhs, const vector &rhs) { return !(lhs < rhs); }
-
-
 
 	}; // class vector
 

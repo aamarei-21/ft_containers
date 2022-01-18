@@ -151,26 +151,6 @@ namespace ft {
 
 		size_type max_size() const { return alloc.max_size(); }
 
-/**************************** Element access **********************************/
-
-//		mapped_type& at( const Key& key ){
-//			node_type *node = find_node(key);
-//			if (!node)
-//				throw std::out_of_range("map");
-//			return (node->_Val.second);
-//		}
-//
-//		const mapped_type& at( const Key& key ) const{
-//			node_type *node = find_node(key);
-//			if (!node)
-//				throw std::out_of_range("map");
-//			return (node->_Val.second);
-//		}
-//
-//		mapped_type &operator[](const key_type &k) {
-//			return (*((this->insert(ft::make_pair(k, mapped_type()))).first)).second;
-//		}
-
 /**************************** insert () **********************************/
 		pair<iterator, bool> insert(const value_type &val) {
 			if (_size == 0)
@@ -295,19 +275,6 @@ namespace ft {
 			return end();
 		}
 
-//		const_iterator find(const Key &key) const {
-//			node_pointer temp = _root;
-//			while (temp->_left) {
-//				if (key_comp()(key, temp->_Val.first))
-//					temp = temp->_left;
-//				else if (key_comp()(temp->_Val.first, key))
-//					temp = temp->_right;
-//				else
-//					return iterator(temp);
-//			}
-//			return end();
-//		}
-
 /**************************** count () **********************************/
 		size_type count(const key_type &k) const {
 			node_type *temp = this->_root;
@@ -347,27 +314,6 @@ namespace ft {
 			return (temp == _first) ? iterator(temp->_parent) : iterator(temp);
 		}
 
-//		const_iterator lower_bound(const key_type &k) const {
-//			if (!_root)
-//				return end();
-//			node_type *temp = _root;
-//			while (temp != _first and temp != _last) {
-//				if (key_comp()(k, temp->_Val.first)) {
-//					if (temp->_left->_parent)
-//						temp = temp->_left;
-//					else
-//						return const_iterator(temp);
-//				} else if (key_comp()(temp->_Val.first, k)) {
-//					if (temp->_right->_parent)
-//						temp = temp->_right;
-//					else
-//						return ++const_iterator(temp);
-//				} else
-//					return const_iterator(temp);
-//			}
-//			return (temp == _first) ? const_iterator(temp->_parent) : const_iterator(temp);
-//		}
-
 /**************************** upper_bound () **********************************/
 		iterator upper_bound(const key_type &k) const {
 			if (!_root)
@@ -390,35 +336,10 @@ namespace ft {
 			return (temp == _first) ? iterator(temp->_parent) : iterator(temp);
 		}
 
-//		const_iterator upper_bound(const key_type &k) const {
-//			if (!_root)
-//				return end();
-//			node_type *temp = _root;
-//			while (temp != _first and temp != _last) {
-//				if (key_comp()(k, temp->_Val.first)) {
-//					if (temp->_left->_parent)
-//						temp = temp->_left;
-//					else
-//						return const_iterator(temp);
-//				} else if (key_comp()(temp->_Val.first, k)) {
-//					if (temp->_right and temp->_right->_parent)
-//						temp = temp->_right;
-//					else
-//						return ++const_iterator(temp);
-//				} else
-//					return ++const_iterator(temp);
-//			}
-//			return (temp == _first) ? const_iterator(temp->_parent) : const_iterator(temp);
-//		}
-
 /**************************** equal_range () **********************************/
 		pair<iterator, iterator> equal_range(const key_type &k) const {
 			return ft::make_pair(lower_bound(k), upper_bound(k));
 		}
-
-//		pair<const_iterator, const_iterator> equal_range(const key_type &k) const {
-//			return ft::make_pair(lower_bound(k), upper_bound(k));
-//		}
 
 /**************************** get_allocator () **********************************/
 		allocator_type get_allocator() const { return alloc; }

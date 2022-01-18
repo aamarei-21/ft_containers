@@ -26,8 +26,6 @@ public:
 	bool 			_color; // 0 - black, 1 - red
 	allocator_node alloc;
 
-
-
 	RBNode* grandfather(){ //поиск дедушки
 		if(!_parent || !_parent->_parent)
 			return NULL; //нет дедушки
@@ -197,7 +195,6 @@ public:
 						node->_right->_parent = parent;
 					node->_right = NULL;
 				}
-//				parent = parent->_left;
 			} else { // parent->_right == node
 				if (!node->_right->_left) {
 					parent->_right = node->_right;
@@ -210,7 +207,6 @@ public:
 						node->_left->_parent = parent;
 					node->_left = NULL;
 				}
-//				parent = parent->_right;
 			}
 		}
 		else{
@@ -223,8 +219,6 @@ public:
 		alloc.deallocate(node, 1);
 		return parent;
 	}
-
-
 
 	RBNode* erase(){
 		RBNode* node = this;
